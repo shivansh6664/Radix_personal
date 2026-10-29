@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { SAMPLE_CANDIDATES } from '../lib/radixData';
 import { AuthContext } from './AuthContextDef';
 
 // Helper to compute 12 RADIX category levels from candidate skills
@@ -271,6 +272,28 @@ export function AuthProvider({ children }) {
     setProfile(null);
   };
 
+  const demoLogin = (candidateId = 'ananya-rao') => {
+    const demoCandidate = SAMPLE_CANDIDATES.find(c => c.id === candidateId) || SAMPLE_CANDIDATES[0];
+    const demoUser = {
+      id: demoCandidate.id,
+      email: demoCandidate.email,
+      user_metadata: {
+        full_name: demoCandidate.name,
+        name: demoCandidate.name,
+      },
+    };
+    const demoSession = {
+      access_token: 'demo-session-token',
+      user: demoUser,
+    };
+    setUser(demoUser);
+    setSession(demoSession);
+    setProfile({
+      ...demoCandidate,
+      isCustomer: true,
+    });
+  };
+
   const resetPassword = async (email) => {
     if (!isConfigured || !supabase) {
       throw new Error('Supabase is not configured.');
@@ -368,6 +391,7 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signOut,
+    demoLogin,
     resetPassword,
     updatePassword,
     saveProfileToSupabase,

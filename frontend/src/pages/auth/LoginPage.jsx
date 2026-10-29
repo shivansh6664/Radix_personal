@@ -9,23 +9,34 @@ import {
   ArrowRight,
   AlertCircle,
   RefreshCw,
-  Database
+  Database,
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, isConfigured } = useAuth();
+  const { signIn, demoLogin, isConfigured } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState(location.state?.message || null);
 
   const destination = location.state?.from?.pathname || '/';
+
+  const handleDemoAccess = () => {
+    setDemoLoading(true);
+    setTimeout(() => {
+      demoLogin();
+      navigate(destination, { replace: true });
+    }, 200);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,41 +78,17 @@ export default function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'var(--bg-navy)',
-        padding: '24px 16px',
+        backgroundImage:
+          'radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(129, 140, 248, 0.08) 0px, transparent 50%), radial-gradient(at 50% 100%, rgba(52, 211, 153, 0.05) 0px, transparent 50%)',
+        padding: '32px 16px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Background ambient glow circles */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '-10%',
-          left: '20%',
-          width: '500px',
-          height: '500px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(69, 214, 255, 0.08) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '-10%',
-          right: '20%',
-          width: '500px',
-          height: '500px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139, 124, 255, 0.08) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-
       <div
         style={{
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '460px',
           zIndex: 1,
         }}
       >
@@ -109,44 +96,68 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div
             style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #45D6FF 0%, #8B7CFF 100%)',
+              width: '48px',
+              height: '48px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #38BDF8 0%, #818CF8 100%)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 24px rgba(69, 214, 255, 0.35)',
-              marginBottom: '14px',
+              boxShadow: '0 0 28px rgba(56, 189, 248, 0.4)',
+              marginBottom: '16px',
             }}
           >
-            <Zap size={24} color="#0B1020" style={{ fill: '#0B1020' }} />
+            <Zap size={24} color="#070A12" style={{ fill: '#070A12' }} />
           </div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em', marginBottom: '6px' }}>
             RADIX <span style={{ color: 'var(--accent-cyan)' }}>SkillSync</span>
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Know Your Skills. Own Your Future.
+            Know Your Skills. Own Your Future. · Mobbin Edition
           </p>
         </div>
 
-        {/* Main Card */}
+        {/* Main Card with Mobbin Frosted Glass */}
         <div
           style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-medium)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '32px 28px',
-            boxShadow: 'var(--shadow-lg)',
+            background: 'rgba(15, 22, 38, 0.85)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '36px 32px',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -15px rgba(0, 0, 0, 0.7)',
           }}
         >
-          <div style={{ marginBottom: '22px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
-              Welcome back
-            </h2>
-            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
-              Sign in to your account to access your career profile and job matches.
-            </p>
+          {/* Quick Demo Access Button */}
+          <div style={{ marginBottom: '24px' }}>
+            <button
+              onClick={handleDemoAccess}
+              disabled={demoLoading}
+              className="btn btn-primary btn-lg"
+              style={{
+                width: '100%',
+                padding: '13px',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+              }}
+            >
+              <Sparkles size={16} />
+              <span>{demoLoading ? 'Entering Platform...' : 'Explore Platform (Instant Demo Access)'}</span>
+              <ArrowRight size={15} />
+            </button>
+            <div style={{ textAlign: 'center', marginTop: '6px', fontSize: '11px', color: 'var(--text-subtle)' }}>
+              1-click instant preview with full access to all 5 roles & intelligence modules
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '22px 0', color: 'var(--text-subtle)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
+            <span>or sign in with supabase</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
           </div>
 
           {!isConfigured && (
@@ -157,8 +168,8 @@ export default function LoginPage() {
                 gap: '10px',
                 padding: '12px 14px',
                 borderRadius: 'var(--radius-md)',
-                background: 'rgba(244, 190, 94, 0.1)',
-                border: '1px solid rgba(244, 190, 94, 0.3)',
+                background: 'rgba(251, 191, 36, 0.1)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
                 color: 'var(--warning)',
                 fontSize: '12px',
                 marginBottom: '20px',
@@ -184,7 +195,7 @@ export default function LoginPage() {
                 padding: '12px 14px',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--error-subtle)',
-                border: '1px solid rgba(255, 107, 129, 0.3)',
+                border: '1px solid rgba(248, 113, 113, 0.3)',
                 color: 'var(--error)',
                 fontSize: '12.5px',
                 marginBottom: '20px',
@@ -213,7 +224,6 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  required
                 />
               </div>
             </div>
@@ -243,7 +253,6 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
-                  required
                 />
                 <button
                   type="button"
@@ -283,8 +292,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '11px', marginTop: '6px' }}
+              className="btn btn-secondary"
+              style={{ width: '100%', padding: '11px', marginTop: '4px' }}
             >
               {loading ? (
                 <>
@@ -293,7 +302,7 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Sign In with Account</span>
                   <ArrowRight size={15} />
                 </>
               )}
@@ -303,15 +312,15 @@ export default function LoginPage() {
           {/* Footer Navigation */}
           <div
             style={{
-              marginTop: '24px',
-              paddingTop: '20px',
+              marginTop: '22px',
+              paddingTop: '18px',
               borderTop: '1px solid var(--border-subtle)',
               textAlign: 'center',
               fontSize: '12.5px',
               color: 'var(--text-muted)',
             }}
           >
-            <span>Don't have an account? </span>
+            <span>Don&apos;t have an account? </span>
             <Link
               to="/register"
               style={{
@@ -326,8 +335,9 @@ export default function LoginPage() {
         </div>
 
         {/* Security / Technology Badge */}
-        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '11px', color: 'var(--text-subtle)' }}>
-          Protected by Supabase Auth with Row Level Security (RLS)
+        <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '11px', color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <ShieldCheck size={13} color="var(--success)" />
+          <span>Protected by Supabase Auth with Row Level Security (RLS)</span>
         </div>
       </div>
     </div>
