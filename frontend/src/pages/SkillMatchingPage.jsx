@@ -19,10 +19,10 @@ import ScoreRing from '../components/ui/ScoreRing';
 import { RADIX_CATEGORIES } from '../lib/radixData';
 
 function getFitRating(score) {
-  if (score >= 80) return { label: 'High Fit — Prime Interview Candidate', color: '#35D49A' };
-  if (score >= 65) return { label: 'Promising Fit — Close Top Gaps', color: '#45D6FF' };
-  if (score >= 50) return { label: 'Moderate Fit — Preparation Needed', color: '#F4BE5E' };
-  return { label: 'Early Match — Foundational Training Advised', color: '#FF6B81' };
+  if (score >= 80) return { label: 'High Fit — Prime Interview Candidate', color: '#34D399' };
+  if (score >= 65) return { label: 'Promising Fit — Close Top Gaps', color: '#38BDF8' };
+  if (score >= 50) return { label: 'Moderate Fit — Preparation Needed', color: '#FBBF24' };
+  return { label: 'Early Match — Foundational Training Advised', color: '#F87171' };
 }
 
 function getRecommendation(skillName, categoryCode) {
@@ -80,7 +80,6 @@ export default function SkillMatchingPage() {
     isSubmittingRef.current = true;
     setLoading(true);
     setError(null);
-    // Clear stale results immediately so failed requests never display old data
     setMatchResult(null);
 
     try {
@@ -204,11 +203,11 @@ export default function SkillMatchingPage() {
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>
-            Skill Matching
+          <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
+            Skill Matching & Role Alignment
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Compare candidate competencies against target job requirements using fuzzy skill matching.
+            Compare candidate competencies against target job requirements using semantic and fuzzy matching.
           </p>
         </div>
 
@@ -234,12 +233,13 @@ export default function SkillMatchingPage() {
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '20px',
+          borderRadius: 'var(--radius-xl)',
+          padding: '20px 24px',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr auto',
           gap: '16px',
           alignItems: 'flex-end',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
         <div>
@@ -297,7 +297,7 @@ export default function SkillMatchingPage() {
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-xl)',
-            padding: '60px 24px',
+            padding: '80px 24px',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
@@ -310,13 +310,13 @@ export default function SkillMatchingPage() {
               width: '44px',
               height: '44px',
               borderRadius: '50%',
-              border: '3px solid rgba(69, 214, 255, 0.2)',
+              border: '3px solid rgba(56, 189, 248, 0.2)',
               borderTopColor: 'var(--accent-cyan)',
               animation: 'spin 0.8s linear infinite',
             }}
           />
           <div>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
               Analyzing Skill Alignment...
             </h3>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
@@ -330,8 +330,8 @@ export default function SkillMatchingPage() {
       {error && !loading && (
         <div
           style={{
-            background: 'rgba(255, 107, 129, 0.08)',
-            border: '1px solid rgba(255, 107, 129, 0.3)',
+            background: 'rgba(248, 113, 113, 0.08)',
+            border: '1px solid rgba(248, 113, 113, 0.3)',
             borderRadius: 'var(--radius-lg)',
             padding: '24px',
             display: 'flex',
@@ -345,7 +345,7 @@ export default function SkillMatchingPage() {
                 width: '40px',
                 height: '40px',
                 borderRadius: '10px',
-                background: 'rgba(255, 107, 129, 0.15)',
+                background: 'rgba(248, 113, 113, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -388,7 +388,7 @@ export default function SkillMatchingPage() {
               No Active Match Result
             </h3>
             <p style={{ fontSize: '13px', maxWidth: '420px', margin: '0 auto 20px' }}>
-              Select a candidate profile and target job description above, then click "Run Skill Match" to calculate the match score and skill gaps.
+              Select a candidate profile and target job description above, then click &quot;Run Skill Match&quot; to calculate the match score and skill gaps.
             </p>
             <button
               onClick={() => executeMatch(activeCandidate, currentJob, true)}
@@ -407,22 +407,22 @@ export default function SkillMatchingPage() {
           {/* Hero Match Score Summary Card */}
           <div
             style={{
-              background: 'linear-gradient(135deg, rgba(21, 31, 51, 0.95) 0%, rgba(27, 38, 64, 0.9) 100%)',
-              border: '1px solid var(--border-medium)',
+              background: 'linear-gradient(135deg, rgba(16, 23, 41, 0.95) 0%, rgba(12, 16, 28, 0.98) 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
               borderRadius: 'var(--radius-xl)',
-              padding: '28px 36px',
+              padding: '32px 40px',
               display: 'grid',
               gridTemplateColumns: '220px 1fr',
-              gap: '32px',
+              gap: '36px',
               alignItems: 'center',
-              boxShadow: 'var(--shadow-md)',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--shadow-lg)',
             }}
           >
-            {/* Score Ring with Prominent Percentage */}
+            {/* Score Ring */}
             <div style={{ textAlign: 'center' }}>
               <ScoreRing
                 score={matchResult.match_score}
-                size={160}
+                size={165}
                 strokeWidth={14}
                 sublabel="/ 100 Match"
                 color={ratingInfo.color}
@@ -431,7 +431,7 @@ export default function SkillMatchingPage() {
             </div>
 
             <div>
-              {/* Job Metadata & Supporting Source File */}
+              {/* Job Metadata */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                 <span className="badge badge-primary">{matchResult.company}</span>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -449,7 +449,7 @@ export default function SkillMatchingPage() {
                 )}
               </div>
 
-              <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '10px', letterSpacing: '-0.025em' }}>
                 {matchResult.jobTitle}
               </h2>
 
@@ -459,14 +459,14 @@ export default function SkillMatchingPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '4px 10px',
+                  padding: '4px 12px',
                   borderRadius: 'var(--radius-full)',
                   background: `${ratingInfo.color}15`,
                   border: `1px solid ${ratingInfo.color}40`,
                   color: ratingInfo.color,
                   fontSize: '12px',
                   fontWeight: '700',
-                  marginBottom: '12px',
+                  marginBottom: '14px',
                 }}
               >
                 <Sparkles size={13} />
@@ -475,7 +475,7 @@ export default function SkillMatchingPage() {
 
               {/* Linear Indicator */}
               <div style={{ marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: 'var(--text-muted)', marginBottom: '6px' }}>
                   <span>Requirements Fit Rate</span>
                   <span style={{ fontWeight: '700', color: ratingInfo.color }}>{matchResult.match_score}% Satisfied</span>
                 </div>
@@ -491,20 +491,20 @@ export default function SkillMatchingPage() {
                   />
                 </div>
                 {matchResult.match_score === 0 && (
-                  <p style={{ fontSize: '11.5px', color: '#F4BE5E', marginTop: '8px', lineHeight: 1.5 }}>
-                    Analysis complete: 0 of {matchResult.missing_skills.length} required competencies for this specific role matched Shaurya&apos;s current profile. See the 9 missing requirements below or select an aligned job (e.g. Applied AI Engineer).
+                  <p style={{ fontSize: '11.5px', color: 'var(--warning)', marginTop: '8px', lineHeight: 1.5 }}>
+                    Analysis complete: 0 of {matchResult.missing_skills.length} required competencies for this specific role matched {matchResult.candidateName}&apos;s current profile. See missing requirements below or select an aligned job.
                   </p>
                 )}
               </div>
 
-              {/* Counts with Green & Orange/Red Badges */}
-              <div style={{ display: 'flex', gap: '20px', fontSize: '12px', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px', flexWrap: 'wrap' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#35D49A', fontWeight: '700' }}>
+              {/* Counts */}
+              <div style={{ display: 'flex', gap: '20px', fontSize: '12px', borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', flexWrap: 'wrap' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--success)', fontWeight: '700' }}>
                   <CheckCircle2 size={16} />
                   <span className="badge badge-success">{matchResult.matched_skills.length}</span>
                   Matched Skills
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF6B81', fontWeight: '700' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--error)', fontWeight: '700' }}>
                   <AlertCircle size={16} />
                   <span className="badge badge-danger">{matchResult.missing_skills.length}</span>
                   Missing Competencies
@@ -514,7 +514,7 @@ export default function SkillMatchingPage() {
           </div>
 
           {/* Filter Tabs */}
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-md)', padding: '3px', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
             {[
               { id: 'all', label: `All Requirements (${matchResult.totalCount})` },
               { id: 'matched', label: `Verified Matched (${matchResult.matched_skills.length})` },
@@ -523,31 +523,22 @@ export default function SkillMatchingPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: activeTab === tab.id ? '2px solid var(--accent-cyan)' : '2px solid transparent',
-                  color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontWeight: activeTab === tab.id ? '600' : '500',
-                  padding: '10px 14px',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
+                className={`btn-ghost ${activeTab === tab.id ? 'btn-primary' : ''}`}
+                style={{ padding: '6px 14px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}
               >
                 {tab.label}
               </button>
             ))}
           </div>
 
-          {/* 1. VERIFIED MATCHED SKILLS (GREEN BADGES) */}
+          {/* 1. VERIFIED MATCHED SKILLS */}
           {(activeTab === 'all' || activeTab === 'matched') && matchResult.matched_skills.length > 0 && (
             <Card
               title={`Verified Matched Skills (${matchResult.matched_skills.length})`}
               icon={CheckCircle2}
               subtitle="Skills meeting or exceeding the job description threshold via fuzzy matching"
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {matchResult.matched_skills.map((item, idx) => {
                   const cat = RADIX_CATEGORIES[item.category] || RADIX_CATEGORIES['OTHER'];
                   return (
@@ -556,13 +547,14 @@ export default function SkillMatchingPage() {
                       style={{
                         background: 'var(--bg-surface-elevated)',
                         border: '1px solid var(--border-subtle)',
-                        borderLeft: '3px solid #35D49A',
+                        borderLeft: '3px solid var(--success)',
                         borderRadius: 'var(--radius-md)',
                         padding: '14px 18px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         gap: '16px',
+                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                       }}
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -609,20 +601,20 @@ export default function SkillMatchingPage() {
             <Card title="Verified Matched Skills (0)" icon={CheckCircle2}>
               <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--text-muted)' }}>
                 <p style={{ fontSize: '13px' }}>
-                  No directly matching competencies identified between {matchResult.candidateName} and {matchResult.company}'s requirements.
+                  No directly matching competencies identified between {matchResult.candidateName} and {matchResult.company}&apos;s requirements.
                 </p>
               </div>
             </Card>
           )}
 
-          {/* 2. MISSING JOB REQUIREMENTS (ORANGE/RED BADGES) */}
+          {/* 2. MISSING JOB REQUIREMENTS */}
           {(activeTab === 'all' || activeTab === 'missing') && matchResult.missing_skills.length > 0 && (
             <Card
               title={`Missing Job Requirements (${matchResult.missing_skills.length})`}
               icon={AlertCircle}
               subtitle="Skills requested by the employer that were not identified on candidate profile"
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {matchResult.missing_skills.map((item, idx) => {
                   const cat = RADIX_CATEGORIES[item.category] || RADIX_CATEGORIES['OTHER'];
                   const recommendation = getRecommendation(item.skill_name, item.category);
@@ -633,12 +625,13 @@ export default function SkillMatchingPage() {
                       style={{
                         background: 'var(--bg-surface-elevated)',
                         border: '1px solid var(--border-subtle)',
-                        borderLeft: '3px solid #FF6B81',
+                        borderLeft: '3px solid var(--error)',
                         borderRadius: 'var(--radius-md)',
-                        padding: '14px 18px',
+                        padding: '16px 18px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '8px',
+                        boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
@@ -665,7 +658,7 @@ export default function SkillMatchingPage() {
                         </span>
                       </div>
 
-                      <p style={{ fontSize: '12px', color: '#F4BE5E', marginTop: '2px', lineHeight: 1.4 }}>
+                      <p style={{ fontSize: '12px', color: 'var(--warning)', marginTop: '2px', lineHeight: 1.4 }}>
                         <strong>Action Step: </strong> {recommendation}
                       </p>
                     </div>
@@ -677,7 +670,7 @@ export default function SkillMatchingPage() {
 
           {activeTab === 'missing' && matchResult.missing_skills.length === 0 && (
             <Card title="Missing Job Requirements (0)" icon={AlertCircle}>
-              <div style={{ textAlign: 'center', padding: '36px 16px', color: '#35D49A' }}>
+              <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--success)' }}>
                 <p style={{ fontSize: '13px', fontWeight: '600' }}>
                   Outstanding! Zero skill gaps detected — candidate meets or exceeds all required competencies!
                 </p>
@@ -692,9 +685,9 @@ export default function SkillMatchingPage() {
               icon={Target}
               subtitle="Actionable preparation steps before technical interview rounds"
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {matchResult.missing_skills.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '24px', color: '#35D49A' }}>
+                  <div style={{ textAlign: 'center', padding: '24px', color: 'var(--success)' }}>
                     <CheckCircle2 size={32} style={{ margin: '0 auto 8px' }} />
                     <div style={{ fontWeight: '700', fontSize: '15px' }}>
                       Outstanding! No skill gaps detected.
@@ -718,7 +711,9 @@ export default function SkillMatchingPage() {
                           padding: '14px 18px',
                           background: 'var(--bg-surface-elevated)',
                           borderRadius: 'var(--radius-md)',
+                          border: '1px solid var(--border-subtle)',
                           gap: '16px',
+                          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                         }}
                       >
                         <div style={{ flex: 1, minWidth: 0 }}>

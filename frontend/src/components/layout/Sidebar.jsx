@@ -5,7 +5,7 @@ import {
   FileText,
   Briefcase,
   FileSearch,
-  CheckCircle,
+  Award,
   GitCompare,
   Bookmark,
   Settings,
@@ -33,16 +33,31 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
     }
   };
 
-  const navItems = [
-    { name: 'Overview', path: '/', icon: LayoutDashboard },
-    { name: 'My Profile', path: '/profile', icon: User },
-    { name: 'Resume Analyzer', path: '/resume-analyzer', icon: FileText },
-    { name: 'Job Explorer', path: '/job-explorer', icon: Briefcase },
-    { name: 'JD Analytics', path: '/jd-analytics', icon: FileSearch },
-    { name: 'Talent Insights', path: '/talent-insights', icon: CheckCircle },
-    { name: 'Skill Matching', path: '/skill-matching', icon: GitCompare },
-    { name: 'Saved Reports', path: '/saved-reports', icon: Bookmark },
-    { name: 'Settings', path: '/settings', icon: Settings },
+  const navSections = [
+    {
+      title: 'Core Workflow',
+      items: [
+        { name: 'Overview', path: '/', icon: LayoutDashboard },
+        { name: 'JD Analytics', path: '/jd-analytics', icon: FileSearch, badge: 'Role 1' },
+        { name: 'Resume Analyzer', path: '/resume-analyzer', icon: FileText, badge: 'Role 2' },
+        { name: 'Talent Insights', path: '/talent-insights', icon: Award, badge: 'Role 4' },
+        { name: 'Skill Matching', path: '/skill-matching', icon: GitCompare, badge: 'Role 5' },
+      ],
+    },
+    {
+      title: 'Talent & Repository',
+      items: [
+        { name: 'My Profile', path: '/profile', icon: User, badge: 'Role 3' },
+        { name: 'Job Explorer', path: '/job-explorer', icon: Briefcase },
+        { name: 'Saved Reports', path: '/saved-reports', icon: Bookmark },
+      ],
+    },
+    {
+      title: 'System',
+      items: [
+        { name: 'Platform Settings', path: '/settings', icon: Settings },
+      ],
+    },
   ];
 
   return (
@@ -55,15 +70,15 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               width: '34px',
               height: '34px',
               borderRadius: '9px',
-              background: 'linear-gradient(135deg, #45D6FF 0%, #8B7CFF 100%)',
+              background: 'linear-gradient(135deg, #38BDF8 0%, #818CF8 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 16px rgba(69, 214, 255, 0.4)',
+              boxShadow: '0 0 16px rgba(56, 189, 248, 0.4)',
               flexShrink: 0,
             }}
           >
-            <Zap size={18} color="#0B1020" style={{ fill: '#0B1020' }} />
+            <Zap size={18} color="#070A12" style={{ fill: '#070A12' }} />
           </div>
           {!collapsed && (
             <div style={{ whiteSpace: 'nowrap' }}>
@@ -71,24 +86,23 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                 style={{
                   fontWeight: '800',
                   fontSize: '15px',
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.025em',
                   color: 'var(--text-primary)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px'
+                  gap: '6px',
                 }}
               >
                 RADIX <span style={{ color: 'var(--accent-cyan)' }}>SkillSync</span>
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-subtle)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                Career Intelligence
+              <div style={{ fontSize: '10px', color: 'var(--text-subtle)', letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: '600' }}>
+                Mobbin Edition · v2.0
               </div>
             </div>
           )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {/* Mobile close button */}
           {mobileOpen && (
             <button
               onClick={() => setMobileOpen && setMobileOpen(false)}
@@ -107,7 +121,6 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
             </button>
           )}
 
-          {/* Desktop collapse toggle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="btn-ghost"
@@ -126,35 +139,44 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         </div>
       </div>
 
-      {/* Navigation List */}
+      {/* Navigation List grouped by Section */}
       <div className="sidebar-nav-container">
-        {!collapsed && (
-          <div className="sidebar-nav-header">
-            Navigation
+        {navSections.map((section) => (
+          <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {!collapsed && (
+              <div className="sidebar-nav-section-title">
+                {section.title}
+              </div>
+            )}
+            <nav className="sidebar-nav-list">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.path === '/'}
+                    onClick={() => setMobileOpen && setMobileOpen(false)}
+                    className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                    title={collapsed ? item.name : undefined}
+                  >
+                    <span className="sidebar-icon-box">
+                      <Icon size={18} />
+                    </span>
+                    {!collapsed && (
+                      <>
+                        <span className="sidebar-label">{item.name}</span>
+                        {item.badge && (
+                          <span className="sidebar-role-badge">{item.badge}</span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </nav>
           </div>
-        )}
-        <nav className="sidebar-nav-list">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === '/'}
-                onClick={() => setMobileOpen && setMobileOpen(false)}
-                className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
-                title={collapsed ? item.name : undefined}
-              >
-                <span className="sidebar-icon-box">
-                  <Icon size={18} />
-                </span>
-                {!collapsed && (
-                  <span className="sidebar-label">{item.name}</span>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
+        ))}
       </div>
 
       {/* Candidate Mini Profile Card */}
@@ -162,10 +184,11 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
         <div
           style={{
             padding: '12px 14px',
-            margin: '8px 14px',
-            background: 'var(--bg-surface)',
+            margin: '6px 12px 8px',
+            background: 'var(--bg-surface-elevated)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -173,17 +196,17 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               style={{
                 width: '32px',
                 height: '32px',
-                borderRadius: 'var(--radius-sm)',
+                borderRadius: '8px',
                 background: activeCandidate.isCustomer
-                  ? 'linear-gradient(135deg, #1C2844 0%, #203A43 100%)'
-                  : 'linear-gradient(135deg, #1C2844 0%, #283960 100%)',
-                color: activeCandidate.isCustomer ? '#35D49A' : 'var(--accent-cyan)',
+                  ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.2) 0%, rgba(56, 189, 248, 0.2) 100%)'
+                  : 'linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(129, 140, 248, 0.2) 100%)',
+                color: activeCandidate.isCustomer ? 'var(--success)' : 'var(--accent-cyan)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: '700',
                 fontSize: '12px',
-                border: activeCandidate.isCustomer ? '1px solid rgba(53, 212, 154, 0.3)' : '1px solid var(--border-accent)',
+                border: activeCandidate.isCustomer ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid var(--border-accent)',
                 flexShrink: 0,
               }}
             >
@@ -193,8 +216,9 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
               <div style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {activeCandidate.name}
               </div>
-              <div style={{ fontSize: '10.5px', color: 'var(--text-subtle)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {activeCandidate.isCustomer ? 'Active Profile' : (activeCandidate.preferredRoles?.[0] || 'Sample Candidate')}
+              <div style={{ fontSize: '10.5px', color: 'var(--text-subtle)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: activeCandidate.isCustomer ? 'var(--success)' : 'var(--accent-cyan)' }} />
+                {activeCandidate.isCustomer ? 'Active Profile' : (activeCandidate.preferredRoles?.[0] || 'Benchmark Persona')}
               </div>
             </div>
           </div>
@@ -203,7 +227,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
 
       {/* Logout Action (if authenticated) */}
       {isAuthenticated && (
-        <div style={{ padding: collapsed ? '4px 10px 8px' : '4px 14px 8px' }}>
+        <div style={{ padding: collapsed ? '4px 8px 8px' : '4px 12px 8px' }}>
           <button
             onClick={handleSignOut}
             className="sidebar-item"
@@ -252,9 +276,9 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
                   boxShadow: `0 0 6px ${isDemoMode ? 'var(--accent-cyan)' : 'var(--success)'}`,
                 }}
               />
-              {isDemoMode ? 'Standalone' : 'Cloud Sync'}
+              {isDemoMode ? 'Local Engine' : 'Cloud Sync'}
             </span>
-            <span style={{ fontSize: '10px', color: 'var(--text-subtle)', letterSpacing: '0.02em' }}>v1.0 Enterprise</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-subtle)', letterSpacing: '0.02em', fontWeight: '600' }}>FastAPI 8000</span>
           </>
         ) : (
           <span

@@ -11,7 +11,8 @@ import {
   FileSearch,
   UserCheck,
   ChevronRight,
-  Target
+  Target,
+  Zap
 } from 'lucide-react';
 import { useApp } from '../hooks/useApp';
 import { talentCheckService } from '../services/talentCheckService';
@@ -24,17 +25,9 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { activeCandidate, switchActiveCandidate, candidates, jobs, setSelectedJob } = useApp();
   const [chartView, setChartView] = useState('radar');
-
-  if (!activeCandidate) {
-    return (
-      <div style={{ padding: '60px', textAlign: 'center' }}>
-        <p>Loading candidate profile intelligence...</p>
-      </div>
-    );
-  }
-
   const [matchResult, setMatchResult] = useState(null);
-  const talentCheckResult = talentCheckService.calculateReadiness(activeCandidate, 'Google LLC');
+  const [savedReportsCount, setSavedReportsCount] = useState(0);
+
   const targetJob = jobs[0] || null;
 
   useEffect(() => {
@@ -55,19 +48,27 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [activeCandidate, targetJob]);
 
-  const [savedReportsCount, setSavedReportsCount] = useState(0);
-
   useEffect(() => {
     async function loadReportsCount() {
       try {
         const reports = await matchService.getReports();
         setSavedReportsCount(reports?.length || 0);
-      } catch (e) {
+      } catch {
         setSavedReportsCount(0);
       }
     }
     loadReportsCount();
   }, []);
+
+  if (!activeCandidate) {
+    return (
+      <div style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Loading candidate profile intelligence...</p>
+      </div>
+    );
+  }
+
+  const talentCheckResult = talentCheckService.calculateReadiness(activeCandidate, 'Google LLC');
 
   const hasSkills = (activeCandidate.skills?.length || 0) > 0;
   const hasPendingEdu = !activeCandidate.education || activeCandidate.education.includes('Pending');
@@ -87,235 +88,245 @@ export default function DashboardPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-      {/* Hero Welcome Banner */}
+      {/* Mobbin Hero Welcome Banner */}
       <div
         style={{
-          background: 'linear-gradient(135deg, rgba(21, 31, 51, 0.95) 0%, rgba(16, 24, 43, 0.9) 100%)',
-          border: '1px solid var(--border-medium)',
+          background: 'linear-gradient(135deg, rgba(16, 23, 41, 0.95) 0%, rgba(12, 16, 28, 0.98) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: 'var(--radius-xl)',
-          padding: '32px 36px',
+          padding: '36px 40px',
           position: 'relative',
           overflow: 'hidden',
-          boxShadow: 'var(--shadow-md)',
+          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--shadow-lg)',
         }}
       >
+        {/* Subtle Ambient Radial Lighting */}
         <div
           style={{
             position: 'absolute',
-            top: '-50px',
-            right: '-50px',
-            width: '240px',
-            height: '240px',
-            background: 'radial-gradient(circle, rgba(69, 214, 255, 0.15) 0%, transparent 70%)',
+            top: '-80px',
+            right: '-40px',
+            width: '320px',
+            height: '320px',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
         <div
           style={{
             position: 'absolute',
-            bottom: '-40px',
-            right: '25%',
-            width: '200px',
-            height: '200px',
-            background: 'radial-gradient(circle, rgba(139, 124, 255, 0.12) 0%, transparent 70%)',
+            bottom: '-60px',
+            right: '28%',
+            width: '260px',
+            height: '260px',
+            background: 'radial-gradient(circle, rgba(129, 140, 248, 0.12) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', position: 'relative', zIndex: 2 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', position: 'relative', zIndex: 2 }}>
           <div style={{ maxWidth: '680px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: 'var(--radius-full)', background: 'rgba(69, 214, 255, 0.1)', border: '1px solid rgba(69, 214, 255, 0.25)', color: 'var(--accent-cyan)', fontSize: '12px', fontWeight: '600', marginBottom: '14px' }}>
-              <Sparkles size={14} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: 'var(--radius-full)', background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', color: 'var(--accent-cyan)', fontSize: '11.5px', fontWeight: '700', marginBottom: '16px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <Sparkles size={13} />
               <span>RADIX SkillSync · AI Career Intelligence</span>
             </div>
-            <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '-0.03em', marginBottom: '10px', color: '#FFFFFF' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '-0.03em', marginBottom: '10px', color: '#FFFFFF', lineHeight: 1.2 }}>
               Your career, decoded.
             </h1>
-            <p style={{ fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '22px' }}>
-              Discover your strengths, close your skill gaps, and get ready for your next opportunity with the 12-competency hiring framework.
+            <p style={{ fontSize: '14.5px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '24px' }}>
+              Discover your verified competencies, eliminate skill gaps with company hiring standards, and benchmark yourself against tier-1 engineering bars.
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={() => navigate('/jd-analytics')}
                 className="btn btn-primary btn-lg"
               >
-                <FileSearch size={18} />
-                <span>Analyze a Job</span>
+                <FileSearch size={17} />
+                <span>Analyze Job Description</span>
               </button>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/resume-analyzer')}
                 className="btn btn-secondary btn-lg"
               >
-                <UserCheck size={18} />
-                <span>Complete Your Profile</span>
+                <Zap size={17} color="var(--accent-cyan)" />
+                <span>Parse Resume</span>
               </button>
               <button
                 onClick={() => navigate('/talent-insights')}
                 className="btn btn-outline"
-                style={{ padding: '12px 18px' }}
+                style={{ padding: '11px 18px' }}
               >
-                <Target size={16} />
-                <span>View Talent Insights</span>
+                <Target size={15} />
+                <span>Company Benchmarks</span>
               </button>
             </div>
           </div>
 
+          {/* Quick Active Persona Pill */}
           <div
             style={{
               background: 'var(--bg-surface-elevated)',
-              border: '1px solid var(--border-subtle)',
+              border: '1px solid var(--border-medium)',
               borderRadius: 'var(--radius-lg)',
-              padding: '16px 20px',
-              minWidth: '240px',
+              padding: '18px 22px',
+              minWidth: '260px',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
             }}
           >
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-subtle)', fontWeight: '600', marginBottom: '8px', letterSpacing: '0.04em' }}>
-              Current Profile
+            <div style={{ fontSize: '10.5px', textTransform: 'uppercase', color: 'var(--text-subtle)', fontWeight: '700', marginBottom: '10px', letterSpacing: '0.06em', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Active Subject</span>
+              <span style={{ color: activeCandidate.isCustomer ? 'var(--success)' : 'var(--accent-cyan)' }}>
+                {activeCandidate.isCustomer ? 'Your Account' : 'Demo Persona'}
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
               <div
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #45D6FF 0%, #8B7CFF 100%)',
-                  color: '#0B1020',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '11px',
+                  background: activeCandidate.isCustomer
+                    ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(56, 189, 248, 0.25) 100%)'
+                    : 'linear-gradient(135deg, #38BDF8 0%, #818CF8 100%)',
+                  color: activeCandidate.isCustomer ? '#34D399' : '#070A12',
+                  border: activeCandidate.isCustomer ? '1px solid rgba(52, 211, 153, 0.4)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: '800',
-                  fontSize: '14px',
+                  fontSize: '15px',
+                  flexShrink: 0,
                 }}
               >
                 {activeCandidate.avatar || 'CD'}
               </div>
-              <div>
-                <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {activeCandidate.name}
                 </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {activeCandidate.preferredRoles?.[0] || 'Software Engineer'}
                 </div>
               </div>
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
-              {activeCandidate.fitSummary}
+            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', lineHeight: 1.4 }}>
+              {activeCandidate.fitSummary || 'Multi-dimensional readiness active across 12 RADIX standards.'}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 5 Key Metric Cards */}
-      <div className="grid-4" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
-        <Card>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>Profile Completion</span>
+      {/* 5 Key Metric Cards with Mobbin styling */}
+      <div className="grid-5">
+        <Card interactive onClick={() => navigate('/profile')}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Profile Completion</span>
             <UserCheck size={16} color="var(--accent-cyan)" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>{profileCompletion}%</span>
-            <span style={{ fontSize: '11px', color: '#35D49A', fontWeight: '600' }}>Ready</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{profileCompletion}%</span>
+            <span style={{ fontSize: '11px', color: 'var(--success)', fontWeight: '700' }}>Ready</span>
           </div>
-          <div style={{ marginTop: '10px', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ width: `${profileCompletion}%`, height: '100%', background: 'linear-gradient(90deg, #45D6FF, #8B7CFF)' }} />
+          <div style={{ marginTop: '12px', height: '4px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{ width: `${profileCompletion}%`, height: '100%', background: 'linear-gradient(90deg, #38BDF8, #818CF8)' }} />
           </div>
         </Card>
 
         <Card interactive onClick={() => navigate('/skill-matching')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>Latest Job Match</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Latest Job Match</span>
             <Briefcase size={16} color="var(--accent-violet)" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: '800', color: hasSkills ? (matchResult?.ratingColor || '#45D6FF') : 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '28px', fontWeight: '800', color: hasSkills ? (matchResult?.ratingColor || '#38BDF8') : 'var(--text-muted)', letterSpacing: '-0.02em' }}>
               {hasSkills ? `${matchResult?.matchScore ?? 0}%` : '--'}
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              {hasSkills ? `vs ${targetJob?.companyShort || 'Target'}` : 'Pending Match'}
+              {hasSkills ? `vs ${targetJob?.companyShort || 'Target'}` : 'Pending'}
             </span>
           </div>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {hasSkills ? (targetJob?.role || 'Software Engineer') : 'Upload resume to evaluate'}
+            {hasSkills ? (targetJob?.role || 'Software Engineer') : 'Upload resume to calculate'}
           </p>
         </Card>
 
         <Card interactive onClick={() => navigate('/talent-insights')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>Company Readiness</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Company Readiness</span>
             <Award size={16} color="var(--success)" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: '800', color: hasSkills ? '#35D49A' : 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '28px', fontWeight: '800', color: hasSkills ? '#34D399' : 'var(--text-muted)', letterSpacing: '-0.02em' }}>
               {hasSkills ? `${talentCheckResult?.readinessScore ?? 0}/100` : '--'}
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              {hasSkills ? 'Google Bar' : 'Pending Skills'}
+              {hasSkills ? 'Google Bar' : 'Pending'}
             </span>
           </div>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            {hasSkills ? `${talentCheckResult?.categoriesMeeting ?? 0} of 12 categories met` : '0 of 12 standards met'}
+            {hasSkills ? `${talentCheckResult?.categoriesMeeting ?? 0} of 12 standards met` : '0 of 12 standards met'}
           </p>
         </Card>
 
         <Card interactive onClick={() => navigate('/profile')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>Skills Identified</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Skills Verified</span>
             <TrendingUp size={16} color="var(--warning)" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               {identifiedSkillsCount}
             </span>
-            <span style={{ fontSize: '11px', color: 'var(--accent-cyan)' }}>Competencies</span>
+            <span style={{ fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '600' }}>Extracted</span>
           </div>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            Across 12 RADIX standards
+            Mapped across 12 standards
           </p>
         </Card>
 
         <Card interactive onClick={() => navigate('/saved-reports')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)' }}>Saved Matches</span>
-            <Target size={16} color="#45D6FF" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Saved Matches</span>
+            <Target size={16} color="var(--accent-cyan)" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>{savedReportsCount}</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Available</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{savedReportsCount}</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Archived</span>
           </div>
           <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            View report history
+            Access report history
           </p>
         </Card>
       </div>
 
-      {/* Main Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
+      {/* Main Competency Visualizer & Persona Switcher */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '24px' }}>
         <Card
-          title="Skill Proficiency across 12 RADIX Categories"
+          title="Competency Intelligence across 12 RADIX Categories"
           subtitle="Real-time multi-dimensional evaluation based on candidate profile"
           actions={
-            <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)', padding: '2px' }}>
+            <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)', padding: '2px', border: '1px solid var(--border-subtle)' }}>
               <button
                 onClick={() => setChartView('radar')}
                 className={`btn-ghost ${chartView === 'radar' ? 'btn-primary' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '4px' }}
+                style={{ padding: '4px 12px', fontSize: '11.5px', borderRadius: '6px' }}
               >
                 Radar Chart
               </button>
               <button
                 onClick={() => setChartView('bars')}
                 className={`btn-ghost ${chartView === 'bars' ? 'btn-primary' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '4px' }}
+                style={{ padding: '4px 12px', fontSize: '11.5px', borderRadius: '6px' }}
               >
-                Horizontal Bars
+                Competency Bars
               </button>
             </div>
           }
         >
           {!hasSkills ? (
             <div style={{ padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(69, 214, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
                 <Sparkles size={26} color="var(--accent-cyan)" />
               </div>
               <h4 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: '700' }}>
@@ -339,13 +350,13 @@ export default function DashboardPage() {
                 }}
                 size={340}
               />
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '12px', fontSize: '11px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#45D6FF' }}>
-                  <span style={{ width: '10px', height: '10px', background: '#45D6FF', borderRadius: '2px' }} />
-                  {activeCandidate.name} (Verified)
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '14px', fontSize: '11.5px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-cyan)' }}>
+                  <span style={{ width: '10px', height: '10px', background: 'var(--accent-cyan)', borderRadius: '2px' }} />
+                  {activeCandidate.name} (Candidate)
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#8B7CFF' }}>
-                  <span style={{ width: '10px', height: '2px', borderTop: '2px dashed #8B7CFF' }} />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-violet)' }}>
+                  <span style={{ width: '10px', height: '2px', borderTop: '2px dashed var(--accent-violet)' }} />
                   Google SWE Benchmark
                 </span>
               </div>
@@ -369,10 +380,10 @@ export default function DashboardPage() {
           )}
         </Card>
 
-        {/* Right Persona Switcher */}
+        {/* Right Persona Switcher with Mobbin Card styles */}
         <Card
-          title="Sample Candidates Comparison"
-          subtitle="Compare candidate readiness and skill match profiles"
+          title="Sample Benchmark Personas"
+          subtitle="Compare readiness profiles across diverse candidates"
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {candidates.map((cand) => {
@@ -387,34 +398,36 @@ export default function DashboardPage() {
                     background: isSelected ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
                     border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    transition: 'all 0.16s ease',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    boxShadow: isSelected ? '0 0 16px rgba(56, 189, 248, 0.1)' : 'none',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
                     <div
                       style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
-                        background: isSelected ? 'linear-gradient(135deg, #45D6FF, #8B7CFF)' : 'rgba(255, 255, 255, 0.08)',
-                        color: isSelected ? '#0B1020' : 'var(--text-muted)',
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '9px',
+                        background: isSelected ? 'linear-gradient(135deg, #38BDF8, #818CF8)' : 'rgba(255, 255, 255, 0.08)',
+                        color: isSelected ? '#070A12' : 'var(--text-muted)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: '700',
-                        fontSize: '11px',
+                        fontSize: '11.5px',
+                        flexShrink: 0,
                       }}
                     >
                       {cand.avatar || 'CD'}
                     </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: isSelected ? '#FFFFFF' : 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {cand.name}
                       </div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-subtle)' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-subtle)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {cand.headline?.split('·')[0]}
                       </div>
                     </div>
@@ -429,9 +442,9 @@ export default function DashboardPage() {
             })}
           </div>
 
-          <div style={{ marginTop: '18px', padding: '12px 14px', background: 'rgba(69, 214, 255, 0.05)', border: '1px dashed rgba(69, 214, 255, 0.25)', borderRadius: 'var(--radius-md)', fontSize: '12px', color: 'var(--text-muted)' }}>
-            <span style={{ fontWeight: '600', color: 'var(--accent-cyan)' }}>Platform Insight: </span>
-            Switching candidates dynamically recalculates all matching algorithms, radar comparisons, and company gap priorities.
+          <div style={{ marginTop: '18px', padding: '12px 14px', background: 'rgba(56, 189, 248, 0.05)', border: '1px dashed rgba(56, 189, 248, 0.25)', borderRadius: 'var(--radius-md)', fontSize: '12px', color: 'var(--text-muted)' }}>
+            <span style={{ fontWeight: '700', color: 'var(--accent-cyan)' }}>Platform Live Sync: </span>
+            Selecting candidate personas dynamically re-evaluates all 12 competency scores, match reports, and gap analysis in real-time.
           </div>
         </Card>
       </div>
@@ -443,7 +456,7 @@ export default function DashboardPage() {
           subtitle="Areas where candidate meets or exceeds tier-1 standards"
           icon={CheckCircle2}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {topStrengths.map((item) => (
               <div
                 key={item.category_code}
@@ -451,22 +464,24 @@ export default function DashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '10px 14px',
+                  padding: '12px 16px',
                   background: 'var(--bg-surface-elevated)',
                   borderRadius: 'var(--radius-md)',
-                  borderLeft: '3px solid #35D49A',
+                  borderLeft: '3px solid var(--success)',
+                  border: '1px solid var(--border-subtle)',
+                  borderLeftWidth: '3px',
                 }}
               >
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     {item.category_name} ({item.category_code})
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
                     {item.description}
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#35D49A', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--success)', fontFamily: 'var(--font-mono)' }}>
                     Lvl {item.candidate_level}/10
                   </span>
                 </div>
@@ -480,9 +495,9 @@ export default function DashboardPage() {
           subtitle="Prioritized recommendations based on company bar weights"
           icon={AlertTriangle}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {topGaps.length === 0 ? (
-              <p style={{ fontSize: '12px', color: '#35D49A', padding: '12px 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--success)', padding: '12px 0' }}>
                 All evaluated categories meet or exceed the selected benchmark bar!
               </p>
             ) : (
@@ -493,25 +508,27 @@ export default function DashboardPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 14px',
+                    padding: '12px 16px',
                     background: 'var(--bg-surface-elevated)',
                     borderRadius: 'var(--radius-md)',
-                    borderLeft: '3px solid #F4BE5E',
+                    border: '1px solid var(--border-subtle)',
+                    borderLeft: '3px solid var(--warning)',
+                    borderLeftWidth: '3px',
                   }}
                 >
                   <div style={{ maxWidth: '75%' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>{item.category_name}</span>
-                      <span className="badge badge-warning" style={{ fontSize: '9px', padding: '1px 5px' }}>
+                      <span className="badge badge-warning" style={{ fontSize: '9px', padding: '1px 6px' }}>
                         Gap -{item.required_level - item.candidate_level}
                       </span>
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                       Required Lvl {item.required_level} · Candidate Lvl {item.candidate_level}
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate('/talent-check')}
+                    onClick={() => navigate('/talent-insights')}
                     className="btn btn-outline btn-sm"
                   >
                     View Plan
@@ -523,7 +540,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Job Match Opportunities */}
+      {/* Featured Job Match Opportunities */}
       <Card
         title="Featured Job Opportunities"
         subtitle="Explore how candidate competencies align with enterprise job specifications"
@@ -533,7 +550,7 @@ export default function DashboardPage() {
             className="btn btn-ghost btn-sm"
             style={{ color: 'var(--accent-cyan)' }}
           >
-            <span>View All 6 Jobs</span>
+            <span>View All Jobs</span>
             <ArrowRight size={14} />
           </button>
         }
@@ -548,24 +565,25 @@ export default function DashboardPage() {
                   background: 'var(--bg-surface-elevated)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: 'var(--radius-lg)',
-                  padding: '18px',
+                  padding: '20px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  transition: 'border-color 0.15s ease',
+                  transition: 'border-color 0.16s ease, transform 0.16s ease',
+                  boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
                 }}
               >
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <span className="badge badge-primary">{job.companyShort || job.company}</span>
-                    <span style={{ fontSize: '15px', fontWeight: '800', color: match?.ratingColor || '#45D6FF', fontFamily: 'var(--font-mono)' }}>
+                    <span style={{ fontSize: '15px', fontWeight: '800', color: match?.ratingColor || '#38BDF8', fontFamily: 'var(--font-mono)' }}>
                       {match?.matchScore}% Match
                     </span>
                   </div>
                   <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     {job.role}
                   </h4>
-                  <p style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
                     {job.location} · {job.ctc}
                   </p>
                 </div>
@@ -579,7 +597,7 @@ export default function DashboardPage() {
                     className="btn btn-primary btn-sm"
                     style={{ flex: 1 }}
                   >
-                    View Match Report
+                    Match Report
                   </button>
                   <button
                     onClick={() => {

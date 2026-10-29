@@ -74,7 +74,6 @@ export default function ResumeAnalyzerPage() {
     setCurrentStep('Extracting document text from ' + (selectedFile.name || 'document') + '...');
 
     try {
-      // If actual file uploaded by user, safely archive in Supabase Storage private bucket
       if (selectedFile instanceof File && isConfigured && isAuthenticated) {
         try {
           setCurrentStep('Archiving document to Supabase Storage (resumes/' + customerProfile?.id + ')...');
@@ -150,7 +149,6 @@ export default function ResumeAnalyzerPage() {
     if (!analysisResult) return;
     try {
       const targetId = (isAuthenticated && customerProfile?.id) ? customerProfile.id : activeCandidate.id;
-      const targetName = (isAuthenticated && customerProfile?.name) ? customerProfile.name : activeCandidate.name;
       await profileService.mergeResumeSkills(targetId, analysisResult.skills);
       addToast(`Saved ${analysisResult.skills.length} skills to your profile!`, 'success');
       navigate('/profile');
@@ -163,11 +161,11 @@ export default function ResumeAnalyzerPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Page Title */}
       <div>
-        <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>
-          Resume Analyzer
+        <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
+          Resume Analyzer (Role 2)
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-          Extract technical skills, education, evidence quotes, and confidence levels from PDF or DOCX resumes.
+          Automate candidate skill extraction, quote verified evidence, and map directly to 12 RADIX standards.
         </p>
       </div>
 
@@ -181,10 +179,10 @@ export default function ResumeAnalyzerPage() {
           onDragLeave={() => setIsDragOver(false)}
           onDrop={handleFileDrop}
           style={{
-            background: isDragOver ? 'var(--bg-surface-elevated)' : 'var(--bg-surface)',
+            background: isDragOver ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
             border: isDragOver ? '2px dashed var(--accent-cyan)' : '2px dashed var(--border-medium)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '36px 24px',
+            borderRadius: 'var(--radius-xl)',
+            padding: '40px 24px',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
@@ -204,36 +202,37 @@ export default function ResumeAnalyzerPage() {
           />
           <div
             style={{
-              width: '54px',
-              height: '54px',
+              width: '56px',
+              height: '56px',
               borderRadius: '50%',
-              background: 'rgba(69, 214, 255, 0.1)',
+              background: 'rgba(56, 189, 248, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: '16px',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
             }}
           >
             <UploadCloud size={28} color="var(--accent-cyan)" />
           </div>
 
-          <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
+          <h3 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
             {selectedFile ? selectedFile.name : 'Upload Candidate Resume'}
           </h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', maxWidth: '320px', marginBottom: '14px' }}>
+          <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', maxWidth: '340px', marginBottom: '14px' }}>
             Drag and drop your PDF or Word (.docx) file here, or click to browse from your device.
           </p>
 
           {selectedFile && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-subtle)', fontSize: '12px', color: 'var(--accent-cyan)' }}>
-              <FileCheck size={14} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface-elevated)', border: '1px solid var(--accent-cyan)', fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '600' }}>
+              <FileCheck size={14} color="var(--success)" />
               <span>Ready for Analysis: {selectedFile.size ? `(${selectedFile.size})` : ''}</span>
             </div>
           )}
         </div>
 
         {/* Quick Sample Selector */}
-        <Card title="Demo Reference Resumes" subtitle="Select a reference benchmark resume or upload your own to evaluate automated extraction">
+        <Card title="Benchmark Resumes" subtitle="Select a verified candidate resume or upload your own to test extraction">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {sampleResumes.map((sample) => {
               const isSelected = selectedFile?.name === sample.name;
@@ -242,21 +241,22 @@ export default function ResumeAnalyzerPage() {
                   key={sample.name}
                   onClick={() => handleSelectSample(sample)}
                   style={{
-                    padding: '10px 14px',
+                    padding: '12px 14px',
                     borderRadius: 'var(--radius-md)',
                     background: isSelected ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
                     border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                    boxShadow: isSelected ? '0 0 16px rgba(56, 189, 248, 0.12)' : 'none',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    transition: 'all 0.15s ease',
+                    transition: 'all 0.16s ease',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FileText size={18} color={isSelected ? 'var(--accent-cyan)' : 'var(--text-muted)'} />
                     <div>
-                      <div style={{ fontSize: '12.5px', fontWeight: '600', color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: isSelected ? '#FFFFFF' : 'var(--text-secondary)' }}>
                         {sample.name}
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-subtle)' }}>
@@ -275,7 +275,7 @@ export default function ResumeAnalyzerPage() {
               onClick={handleRunAnalysis}
               disabled={!selectedFile || isAnalyzing}
               className="btn btn-primary"
-              style={{ width: '100%', padding: '12px' }}
+              style={{ width: '100%', padding: '12px', fontSize: '13.5px' }}
             >
               {isAnalyzing ? (
                 <>
@@ -285,7 +285,7 @@ export default function ResumeAnalyzerPage() {
               ) : (
                 <>
                   <Sparkles size={16} />
-                  <span>Analyze Resume</span>
+                  <span>Extract Skills & Evidence</span>
                 </>
               )}
             </button>
@@ -305,7 +305,7 @@ export default function ResumeAnalyzerPage() {
               style={{
                 width: `${analysisProgress}%`,
                 height: '100%',
-                background: 'linear-gradient(90deg, #45D6FF 0%, #8B7CFF 100%)',
+                background: 'linear-gradient(90deg, #38BDF8 0%, #818CF8 100%)',
                 transition: 'width 0.3s ease',
               }}
             />
@@ -318,20 +318,21 @@ export default function ResumeAnalyzerPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div
             style={{
-              padding: '12px 18px',
-              borderRadius: 'var(--radius-md)',
-              background: analysisResult.source === 'live_backend' ? 'rgba(53, 212, 154, 0.1)' : 'rgba(69, 214, 255, 0.08)',
-              border: `1px solid ${analysisResult.source === 'live_backend' ? 'rgba(53, 212, 154, 0.3)' : 'rgba(69, 214, 255, 0.25)'}`,
+              padding: '14px 20px',
+              borderRadius: 'var(--radius-lg)',
+              background: analysisResult.source === 'live_backend' ? 'rgba(52, 211, 153, 0.1)' : 'rgba(56, 189, 248, 0.08)',
+              border: `1px solid ${analysisResult.source === 'live_backend' ? 'rgba(52, 211, 153, 0.3)' : 'rgba(56, 189, 248, 0.25)'}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <CheckCircle2 size={18} color={analysisResult.source === 'live_backend' ? '#35D49A' : '#45D6FF'} />
+              <CheckCircle2 size={18} color={analysisResult.source === 'live_backend' ? 'var(--success)' : 'var(--accent-cyan)'} />
               <div>
-                <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
-                  {analysisResult.source === 'live_backend' ? 'AI Cloud Extraction' : 'Verified Document Extraction (Standalone Mode)'}
+                <span style={{ fontWeight: '700', fontSize: '13.5px', color: 'var(--text-primary)' }}>
+                  {analysisResult.source === 'live_backend' ? 'AI Cloud Extraction Complete' : 'Verified Document Extraction (Local Engine)'}
                 </span>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '8px' }}>
                   Parsed from {analysisResult.fileName}
@@ -344,7 +345,7 @@ export default function ResumeAnalyzerPage() {
               className="btn btn-primary btn-sm"
             >
               <Check size={14} />
-              <span>Save to My Profile</span>
+              <span>Save to Candidate Profile</span>
             </button>
           </div>
 
@@ -370,7 +371,7 @@ export default function ResumeAnalyzerPage() {
               </div>
             </div>
             {analysisResult.fitSummary && (
-              <div style={{ marginTop: '12px', padding: '10px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)', fontSize: '12px', color: 'var(--text-muted)' }}>
+              <div style={{ marginTop: '14px', padding: '12px 14px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-md)', fontSize: '12px', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 <strong style={{ color: 'var(--accent-cyan)' }}>Fit Profile: </strong>
                 {analysisResult.fitSummary}
               </div>
@@ -381,7 +382,7 @@ export default function ResumeAnalyzerPage() {
             title={`Extracted Skills & Competencies (${analysisResult.skills.length})`}
             subtitle="Review or correct category classifications and evidence before saving"
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {analysisResult.skills.map((skill, index) => {
                 return (
                   <div
@@ -390,11 +391,12 @@ export default function ResumeAnalyzerPage() {
                       background: 'var(--bg-surface-elevated)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-md)',
-                      padding: '14px',
+                      padding: '14px 16px',
                       display: 'grid',
                       gridTemplateColumns: '1.2fr 180px 140px 1fr 40px',
                       gap: '12px',
                       alignItems: 'center',
+                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                     }}
                   >
                     <div>
@@ -403,7 +405,7 @@ export default function ResumeAnalyzerPage() {
                         className="form-input"
                         value={skill.skill_name}
                         onChange={(e) => handleSkillChange(index, 'skill_name', e.target.value)}
-                        style={{ padding: '6px 10px', fontSize: '12.5px' }}
+                        style={{ padding: '7px 10px', fontSize: '12.5px' }}
                       />
                     </div>
 
@@ -412,7 +414,7 @@ export default function ResumeAnalyzerPage() {
                         className="form-select"
                         value={skill.category_code}
                         onChange={(e) => handleSkillChange(index, 'category_code', e.target.value)}
-                        style={{ padding: '6px 10px', fontSize: '12px' }}
+                        style={{ padding: '7px 10px', fontSize: '12px' }}
                       >
                         {RADIX_CATEGORY_LIST.map((c) => (
                           <option key={c.code} value={c.code}>
@@ -427,11 +429,11 @@ export default function ResumeAnalyzerPage() {
                         className="form-select"
                         value={skill.confidence}
                         onChange={(e) => handleSkillChange(index, 'confidence', e.target.value)}
-                        style={{ padding: '6px 10px', fontSize: '12px' }}
+                        style={{ padding: '7px 10px', fontSize: '12px' }}
                       >
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
+                        <option value="high">High Confidence</option>
+                        <option value="medium">Medium Confidence</option>
+                        <option value="low">Low Confidence</option>
                       </select>
                     </div>
 
@@ -442,14 +444,14 @@ export default function ResumeAnalyzerPage() {
                         value={skill.evidence || ''}
                         onChange={(e) => handleSkillChange(index, 'evidence', e.target.value)}
                         placeholder="Quote from resume"
-                        style={{ padding: '6px 10px', fontSize: '11.5px', color: 'var(--text-muted)' }}
+                        style={{ padding: '7px 10px', fontSize: '11.5px', color: 'var(--text-muted)' }}
                       />
                     </div>
 
                     <button
                       onClick={() => handleRemoveSkill(index)}
                       className="btn-ghost"
-                      style={{ padding: '6px', color: '#FF6B81' }}
+                      style={{ padding: '6px', color: 'var(--error)' }}
                       title="Remove skill"
                     >
                       <Trash2 size={15} />

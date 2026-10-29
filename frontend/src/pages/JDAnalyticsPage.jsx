@@ -213,11 +213,11 @@ export default function JDAnalyticsPage() {
       {/* Page Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>
-            JD Analytics
+          <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
+            Job Description Analytics (Role 1)
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Analyze Job Descriptions, extract required skills mapped to the 12 RADIX categories, and evaluate role expectations.
+            Parse employer JDs, extract core competencies mapped to 12 RADIX standards, and prepare for candidate matching.
           </p>
         </div>
 
@@ -232,25 +232,17 @@ export default function JDAnalyticsPage() {
 
       {/* Input Options: Sample Selector vs Upload vs Paste */}
       <Card>
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', gap: '12px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-md)', padding: '3px', border: '1px solid var(--border-subtle)', width: 'fit-content', marginBottom: '20px' }}>
           {[
-            { id: 'sample', label: 'Select Sample Job Description' },
-            { id: 'paste', label: 'Paste Job Description Text' },
-            { id: 'upload', label: 'Upload JD Document (PDF/DOCX)' },
+            { id: 'sample', label: 'Select Benchmark JD' },
+            { id: 'paste', label: 'Paste Job Description' },
+            { id: 'upload', label: 'Upload Document (PDF/DOCX)' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                borderBottom: activeTab === tab.id ? '2px solid var(--accent-cyan)' : '2px solid transparent',
-                color: activeTab === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                fontWeight: activeTab === tab.id ? '600' : '500',
-                padding: '8px 14px',
-                cursor: 'pointer',
-                fontSize: '13px',
-              }}
+              className={`btn-ghost ${activeTab === tab.id ? 'btn-primary' : ''}`}
+              style={{ padding: '6px 14px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}
             >
               {tab.label}
             </button>
@@ -258,7 +250,7 @@ export default function JDAnalyticsPage() {
         </div>
 
         {activeTab === 'sample' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
             {SAMPLE_JOBS.map((job) => {
               const isSelected = activeJob.id === job.id;
               return (
@@ -266,22 +258,23 @@ export default function JDAnalyticsPage() {
                   key={job.id}
                   onClick={() => handleSelectSampleJob(job)}
                   style={{
-                    padding: '12px 16px',
+                    padding: '16px 18px',
                     borderRadius: 'var(--radius-md)',
                     background: isSelected ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
                     border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                    boxShadow: isSelected ? '0 0 16px rgba(56, 189, 248, 0.12)' : 'none',
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    transition: 'all 0.16s ease',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span className="badge badge-primary">{job.companyShort || job.company}</span>
-                    <span style={{ fontSize: '10px', color: 'var(--text-subtle)' }}>{job.roleCategory}</span>
+                    <span style={{ fontSize: '10.5px', color: 'var(--text-subtle)', fontWeight: '600' }}>{job.roleCategory}</span>
                   </div>
-                  <div style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>
+                  <div style={{ fontWeight: '700', fontSize: '14px', color: isSelected ? '#FFFFFF' : 'var(--text-primary)' }}>
                     {job.role}
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
                     {job.location} · {job.ctc}
                   </div>
                 </div>
@@ -294,7 +287,7 @@ export default function JDAnalyticsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <textarea
               className="form-textarea"
-              style={{ minHeight: '140px' }}
+              style={{ minHeight: '150px' }}
               placeholder="Paste raw job description text here (e.g. responsibilities, requirements, skills)..."
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
@@ -328,10 +321,10 @@ export default function JDAnalyticsPage() {
               }}
               onClick={() => document.getElementById('jd-file-input').click()}
               style={{
-                background: isDragOver ? 'var(--bg-surface-elevated)' : 'var(--bg-surface)',
+                background: isDragOver ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
                 border: isDragOver ? '2px dashed var(--accent-cyan)' : '2px dashed var(--border-medium)',
                 borderRadius: 'var(--radius-lg)',
-                padding: '36px 24px',
+                padding: '40px 24px',
                 textAlign: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
@@ -352,14 +345,15 @@ export default function JDAnalyticsPage() {
               />
               <div
                 style={{
-                  width: '54px',
-                  height: '54px',
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
-                  background: 'rgba(69, 214, 255, 0.1)',
+                  background: 'rgba(56, 189, 248, 0.1)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px auto',
+                  border: '1px solid rgba(56, 189, 248, 0.25)',
                 }}
               >
                 <UploadCloud size={28} color="var(--accent-cyan)" />
@@ -367,12 +361,12 @@ export default function JDAnalyticsPage() {
               <h4 style={{ color: 'var(--text-primary)', marginBottom: '4px', fontSize: '16px', fontWeight: '700' }}>
                 {uploadedFile ? uploadedFile.name : 'Upload Job Description Document'}
               </h4>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
+              <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginBottom: '14px' }}>
                 Drag and drop your PDF or Word (.docx) file here, or click to browse.
               </p>
               {uploadedFile && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface-elevated)', border: '1px solid var(--accent-cyan)', fontSize: '12px', color: 'var(--accent-cyan)', fontWeight: '600' }}>
-                  <CheckCircle2 size={14} color="#35D49A" />
+                  <CheckCircle2 size={14} color="var(--success)" />
                   <span>Ready for Analysis ({(uploadedFile.size / 1024).toFixed(1)} KB)</span>
                 </div>
               )}
@@ -387,7 +381,7 @@ export default function JDAnalyticsPage() {
                       <span style={{ fontWeight: '700', color: 'var(--accent-cyan)' }}>{uploadProgress}%</span>
                     </div>
                     <div style={{ width: '100%', height: '6px', background: 'var(--bg-surface-elevated)', borderRadius: '3px', overflow: 'hidden' }}>
-                      <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'linear-gradient(90deg, #45D6FF, #35D49A)', transition: 'width 0.3s ease' }} />
+                      <div style={{ width: `${uploadProgress}%`, height: '100%', background: 'linear-gradient(90deg, #38BDF8, #34D399)', transition: 'width 0.3s ease' }} />
                     </div>
                   </div>
                 )}
@@ -412,11 +406,11 @@ export default function JDAnalyticsPage() {
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span className="badge badge-primary">{activeJob.company}</span>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: '#35D49A', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--success)', fontFamily: 'var(--font-mono)' }}>
                 {activeJob.ctc}
               </span>
             </div>
-            <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
               {activeJob.role}
             </h2>
             <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
@@ -425,7 +419,7 @@ export default function JDAnalyticsPage() {
                 {activeJob.location}
               </span>
               <span>·</span>
-              <span>Full-Time Position</span>
+              <span>Full-Time Role</span>
               {activeJob.sourceFile && (
                 <>
                   <span>·</span>
@@ -434,7 +428,7 @@ export default function JDAnalyticsPage() {
               )}
             </div>
 
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               {activeJob.overview}
             </p>
           </Card>
@@ -443,7 +437,7 @@ export default function JDAnalyticsPage() {
             title={`Required Skills & Technologies (${activeJob.skills?.length || 0})`}
             subtitle="Extracted requirements mapped to RADIX 12-category standard"
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {activeJob.skills?.map((skill, idx) => {
                 const cat = RADIX_CATEGORIES[skill.category_code] || RADIX_CATEGORIES['OTHER'];
                 return (
@@ -453,10 +447,11 @@ export default function JDAnalyticsPage() {
                       background: 'var(--bg-surface-elevated)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: 'var(--radius-md)',
-                      padding: '12px 16px',
+                      padding: '14px 18px',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '6px',
+                      gap: '8px',
+                      boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -474,7 +469,7 @@ export default function JDAnalyticsPage() {
                         >
                           {skill.category_code}
                         </span>
-                        <span style={{ fontWeight: '600', fontSize: '13.5px', color: 'var(--text-primary)' }}>
+                        <span style={{ fontWeight: '700', fontSize: '13.5px', color: 'var(--text-primary)' }}>
                           {skill.skill_name}
                         </span>
                       </div>
@@ -483,8 +478,8 @@ export default function JDAnalyticsPage() {
                         className="badge"
                         style={{
                           fontSize: '10px',
-                          background: skill.confidence === 'high' ? 'rgba(53, 212, 154, 0.15)' : 'rgba(69, 214, 255, 0.15)',
-                          color: skill.confidence === 'high' ? '#35D49A' : '#45D6FF',
+                          background: skill.confidence === 'high' ? 'rgba(52, 211, 153, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                          color: skill.confidence === 'high' ? 'var(--success)' : 'var(--accent-cyan)',
                         }}
                       >
                         {skill.confidence || 'verified'} confidence
@@ -493,7 +488,7 @@ export default function JDAnalyticsPage() {
 
                     {skill.evidence && (
                       <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', paddingLeft: '8px', borderLeft: '2px solid rgba(255,255,255,0.1)' }}>
-                        "{skill.evidence}"
+                        &quot;{skill.evidence}&quot;
                       </p>
                     )}
                   </div>
@@ -528,7 +523,7 @@ export default function JDAnalyticsPage() {
           )}
 
           {activeJob.requirements && (
-            <Card title="Qualifications & What They Look For" icon={BookOpen}>
+            <Card title="Qualifications & Requirements" icon={BookOpen}>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', padding: 0 }}>
                 {activeJob.requirements.map((req, idx) => (
                   <li
@@ -554,20 +549,20 @@ export default function JDAnalyticsPage() {
             <Card title="Additional Context">
               {activeJob.niceToHave && (
                 <div style={{ marginBottom: '12px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Nice to Have
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '3px' }}>
                     {activeJob.niceToHave}
                   </p>
                 </div>
               )}
               {activeJob.benefits && (
                 <div>
-                  <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     Benefits & Perks
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '3px' }}>
                     {activeJob.benefits}
                   </p>
                 </div>

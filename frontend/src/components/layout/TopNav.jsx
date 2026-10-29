@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate, NavLink } from 'react-router-dom';
 import {
   Menu,
   ChevronDown,
@@ -7,7 +7,12 @@ import {
   LogOut,
   User as UserIcon,
   Settings as SettingsIcon,
-  ShieldCheck
+  ShieldCheck,
+  FileSearch,
+  FileText,
+  Award,
+  GitCompare,
+  Check
 } from 'lucide-react';
 import { useApp } from '../../hooks/useApp';
 import { useAuth } from '../../hooks/useAuth';
@@ -56,6 +61,13 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
 
   const { title, subtitle } = getPageTitle(location.pathname);
 
+  const workflowSteps = [
+    { num: '1', name: 'JD Analytics', path: '/jd-analytics', icon: FileSearch },
+    { num: '2', name: 'Resume Parser', path: '/resume-analyzer', icon: FileText },
+    { num: '3', name: 'Talent Check', path: '/talent-insights', icon: Award },
+    { num: '4', name: 'Skill Match', path: '/skill-matching', icon: GitCompare },
+  ];
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -85,7 +97,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
 
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               {title}
             </span>
           </div>
@@ -95,7 +107,29 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
         </div>
       </div>
 
-      {/* Right: Mode indicator, Candidate Selector, and User Account */}
+      {/* Center: Mobbin Interactive Workflow Stepper */}
+      <div className="workflow-stepper">
+        {workflowSteps.map((step, idx) => {
+          const isActive = location.pathname === step.path;
+          return (
+            <div key={step.path} style={{ display: 'flex', alignItems: 'center' }}>
+              <NavLink
+                to={step.path}
+                className={`stepper-step ${isActive ? 'active' : ''}`}
+                title={`Go to Step ${step.num}: ${step.name}`}
+              >
+                <span className="stepper-step-num">{step.num}</span>
+                <span>{step.name}</span>
+              </NavLink>
+              {idx < workflowSteps.length - 1 && (
+                <span className="stepper-arrow">›</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Right: Backend Status, Candidate Selector, and User Account */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* Backend Status Pill */}
         <Link
@@ -104,27 +138,27 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
           style={{
             cursor: 'pointer',
             padding: '4px 10px',
-            background: isBackendOnline ? 'rgba(53, 212, 154, 0.12)' : 'rgba(69, 214, 255, 0.12)',
-            border: `1px solid ${isBackendOnline ? 'rgba(53, 212, 154, 0.3)' : 'rgba(69, 214, 255, 0.3)'}`,
-            color: isBackendOnline ? '#35D49A' : '#45D6FF',
+            background: isBackendOnline ? 'rgba(52, 211, 153, 0.12)' : 'rgba(56, 189, 248, 0.12)',
+            border: `1px solid ${isBackendOnline ? 'rgba(52, 211, 153, 0.35)' : 'rgba(56, 189, 248, 0.35)'}`,
+            color: isBackendOnline ? 'var(--success)' : 'var(--accent-cyan)',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             textDecoration: 'none',
           }}
-          title={isBackendOnline ? 'Connected to Enterprise Services' : 'Running in Offline Mode'}
+          title={isBackendOnline ? 'Connected to FastAPI Backend (8000)' : 'Running in Standalone Mode'}
         >
           <span
             style={{
               width: '6px',
               height: '6px',
               borderRadius: '50%',
-              background: isBackendOnline ? '#35D49A' : '#45D6FF',
-              boxShadow: `0 0 6px ${isBackendOnline ? '#35D49A' : '#45D6FF'}`,
+              background: isBackendOnline ? 'var(--success)' : 'var(--accent-cyan)',
+              boxShadow: `0 0 8px ${isBackendOnline ? 'var(--success)' : 'var(--accent-cyan)'}`,
             }}
           />
-          <span style={{ fontSize: '10.5px', fontWeight: '600' }}>
-            {isBackendOnline ? 'Connected' : 'Offline'}
+          <span style={{ fontSize: '10.5px', fontWeight: '700', letterSpacing: '0.04em' }}>
+            {isBackendOnline ? 'API LIVE' : 'OFFLINE'}
           </span>
         </Link>
 
@@ -143,6 +177,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
               cursor: 'pointer',
               color: 'var(--text-primary)',
               transition: 'all 0.15s ease',
+              boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
             }}
             title="Switch active candidate profile"
           >
@@ -152,9 +187,9 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                 height: '26px',
                 borderRadius: '6px',
                 background: activeCandidate?.isCustomer
-                  ? 'linear-gradient(135deg, #35D49A 0%, #45D6FF 100%)'
-                  : 'linear-gradient(135deg, #45D6FF 0%, #8B7CFF 100%)',
-                color: '#0B1020',
+                  ? 'linear-gradient(135deg, #34D399 0%, #38BDF8 100%)'
+                  : 'linear-gradient(135deg, #38BDF8 0%, #818CF8 100%)',
+                color: '#070A12',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -169,7 +204,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                 {activeCandidate?.name || 'Select Candidate'}
               </div>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                {activeCandidate?.isCustomer ? 'Active Profile' : 'Sample Candidate'}
+                {activeCandidate?.isCustomer ? 'Active Profile' : 'Benchmark Persona'}
               </div>
             </div>
             <ChevronDown size={14} color="var(--text-muted)" />
@@ -181,8 +216,8 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                 position: 'absolute',
                 top: 'calc(100% + 8px)',
                 right: 0,
-                width: '280px',
-                background: 'var(--bg-surface)',
+                width: '290px',
+                background: 'var(--bg-surface-solid)',
                 border: '1px solid var(--border-medium)',
                 borderRadius: 'var(--radius-md)',
                 boxShadow: 'var(--shadow-lg)',
@@ -191,7 +226,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                 animation: 'fadeIn 0.15s ease',
               }}
             >
-              <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border-subtle)', fontSize: '11px', fontWeight: '600', color: 'var(--text-subtle)', textTransform: 'uppercase' }}>
+              <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border-subtle)', fontSize: '11px', fontWeight: '700', color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Candidate Selection
               </div>
 
@@ -224,14 +259,14 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                           width: '28px',
                           height: '28px',
                           borderRadius: '6px',
-                          background: 'rgba(53, 212, 154, 0.15)',
-                          color: '#35D49A',
+                          background: 'rgba(52, 211, 153, 0.15)',
+                          color: '#34D399',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontSize: '11px',
                           fontWeight: '700',
-                          border: '1px solid rgba(53, 212, 154, 0.3)',
+                          border: '1px solid rgba(52, 211, 153, 0.3)',
                         }}
                       >
                         {c.avatar || 'ME'}
@@ -239,7 +274,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span>{c.name}</span>
-                          <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(53, 212, 154, 0.2)', color: '#35D49A' }}>
+                          <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '4px', background: 'rgba(52, 211, 153, 0.2)', color: '#34D399', fontWeight: '700' }}>
                             You
                           </span>
                         </div>
@@ -247,12 +282,13 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                           {c.preferredRoles?.[0] || 'Software Engineer'} · {c.skills?.length || 0} skills
                         </div>
                       </div>
+                      {isCurrent && <Check size={14} color="var(--accent-cyan)" />}
                     </div>
                   );
                 })}
 
                 <div style={{ padding: '12px 14px 4px', borderTop: '1px solid var(--border-subtle)', fontSize: '10px', fontWeight: '700', color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Demo Benchmark Personas</span>
+                  <span>Benchmark Personas</span>
                   <span style={{ fontSize: '9px', fontWeight: '600', color: 'var(--accent-cyan)' }}>Reference</span>
                 </div>
                 {candidates.filter(c => !c.isCustomer).map((c) => {
@@ -299,6 +335,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                           {c.preferredRoles?.[0] || 'Candidate'}
                         </div>
                       </div>
+                      {isCurrent && <Check size={14} color="var(--accent-cyan)" />}
                     </div>
                   );
                 })}
@@ -313,7 +350,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                     alignItems: 'center',
                     gap: '6px',
                     fontSize: '11.5px',
-                    fontWeight: '500',
+                    fontWeight: '600',
                     color: 'var(--accent-cyan)',
                     textDecoration: 'none',
                     padding: '4px 6px',
@@ -336,7 +373,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1C2844 0%, #283960 100%)',
+                background: 'linear-gradient(135deg, #162035 0%, #1E2B47 100%)',
                 border: '1px solid var(--border-accent)',
                 color: 'var(--accent-cyan)',
                 display: 'flex',
@@ -359,7 +396,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                   top: 'calc(100% + 8px)',
                   right: 0,
                   width: '240px',
-                  background: 'var(--bg-surface)',
+                  background: 'var(--bg-surface-solid)',
                   border: '1px solid var(--border-medium)',
                   borderRadius: 'var(--radius-md)',
                   boxShadow: 'var(--shadow-lg)',
@@ -376,7 +413,7 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                     {displayEmail}
                   </div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '10px', color: '#35D49A' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '6px', fontSize: '10px', color: 'var(--success)' }}>
                     <ShieldCheck size={12} />
                     <span>Supabase Authenticated</span>
                   </div>
@@ -397,7 +434,6 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                       color: 'var(--text-primary)',
                       textDecoration: 'none',
                     }}
-                    className="dropdown-item-hover"
                   >
                     <UserIcon size={14} color="var(--accent-cyan)" />
                     <span>My Profile</span>
@@ -416,7 +452,6 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                       color: 'var(--text-primary)',
                       textDecoration: 'none',
                     }}
-                    className="dropdown-item-hover"
                   >
                     <SettingsIcon size={14} color="var(--text-muted)" />
                     <span>Platform Settings</span>
