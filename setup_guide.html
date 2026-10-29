@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RADIX Talent Match — Team Setup & Onboarding Guide</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.5;
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+  }
+  .header {
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 22px;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+  }
+  h2 {
+    font-size: 15px;
+    color: #1e3a8a;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+    margin-top: 18px;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  h3 {
+    font-size: 13px;
+    color: #0f172a;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  p, ul {
+    margin: 4px 0 8px 0;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 3px;
+  }
+  .code-block {
+    background-color: #0f172a;
+    color: #f8fafc;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+    margin: 6px 0 10px 0;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .comment {
+    color: #94a3b8;
+  }
+  .keyword {
+    color: #38bdf8;
+  }
+  .alert {
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 12px;
+  }
+  .alert-warning {
+    background-color: #fefce8;
+    border-left: 4px solid #eab308;
+    color: #713f12;
+  }
+  .alert-error {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🛠️ RADIX Talent Match — Team Setup Guide</h1>
+  <p class="subtitle">Complete onboarding instructions to configure and run the backend microservices and frontend web app.</p>
+</div>
+
+<h2>📋 Prerequisites</h2>
+<ul>
+  <li><strong>Python 3.10+</strong> (Check with: <code>python --version</code>)</li>
+  <li><strong>Node.js 18+ and npm</strong> (Check with: <code>node -v</code> and <code>npm -v</code>)</li>
+  <li><strong>Git & VS Code</strong></li>
+</ul>
+
+<h2>⚡ Step-by-Step Setup Instructions</h2>
+
+<h3>Step 1: Backend Microservices (Terminal 1)</h3>
+<p>Open a terminal in the cloned repository and run:</p>
+<div class="code-block"><span class="comment"># 1. Navigate to the backend directory</span>
+cd backend
+
+<span class="comment"># 2. (Recommended) Create & activate a Python virtual environment</span>
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+<span class="comment"># 3. Install all required dependencies</span>
+python -m pip install --upgrade pip
+pip install -r requirements.txt</div>
+
+<p>Create a file named <strong><code>.env</code></strong> inside the <strong><code>backend/</code></strong> folder with the following content:</p>
+<div class="code-block"><span class="comment"># backend/.env</span>
+OPENROUTER_API_KEY=<YOUR_OPENROUTER_API_KEY>
+OPENROUTER_MODEL=nvidia/nemotron-3.5-super-vl:free
+PORT=8000</div>
+
+<p>Start the backend API using <code>python -m uvicorn</code>:</p>
+<div class="code-block"><span class="comment"># Using 'python -m uvicorn' avoids Windows PATH issues:</span>
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload</div>
+<div class="alert">
+  <strong>Backend Status:</strong> Live on <code>http://127.0.0.1:8000</code> | Interactive API Docs: <code>http://127.0.0.1:8000/docs</code>
+</div>
+
+<h3>Step 2: Frontend Client (Terminal 2)</h3>
+<p>Open a <strong>second terminal</strong> window in the project root:</p>
+<div class="code-block"><span class="comment"># 1. Navigate to the frontend directory</span>
+cd frontend</div>
+
+<p>To eliminate the <strong>database connection error</strong>, create a file named <strong><code>.env</code></strong> inside <strong><code>frontend/</code></strong> with:</p>
+<div class="code-block"><span class="comment"># frontend/.env</span>
+VITE_SUPABASE_URL=https://gopyodujrpfbdutlagaf.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_eVAB3VtCN7ZQ5MbQ1NKCdA_5yLWfDJ4
+VITE_API_URL=http://127.0.0.1:8000
+VITE_ROLE5_API_URL=http://127.0.0.1:8000
+VITE_ROLE2_API_URL=http://127.0.0.1:8000</div>
+
+<p>Install packages and launch the Vite development server:</p>
+<div class="code-block"><span class="comment"># 2. Install dependencies & start</span>
+npm install
+npm run dev</div>
+<div class="alert">
+  <strong>Frontend Status:</strong> Open your browser at <strong><code>http://localhost:5173</code></strong>
+</div>
+
+<div class="page-break"></div>
+
+<h2>🔍 Troubleshooting Common Issues</h2>
+
+<div class="alert alert-error">
+  <strong>❌ Issue 1: <code>uvicorn : The term 'uvicorn' is not recognized</code></strong>
+</div>
+<ul>
+  <li><strong>Why it occurs:</strong> Python packages haven't been installed yet, or Windows PowerShell doesn't have Python's <code>Scripts</code> directory in its environment <code>PATH</code>.</li>
+  <li><strong>Solution:</strong> Run <code>pip install -r requirements.txt</code> inside <code>backend/</code>, and always launch via:<br>
+    <code>python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload</code>
+  </li>
+</ul>
+
+<div class="alert alert-warning">
+  <strong>⚠️ Issue 2: Frontend Database Warning / Supabase Error Popup</strong>
+</div>
+<ul>
+  <li><strong>Why it occurs:</strong> Because <code>.env</code> is gitignored, newly cloned repositories do not have <code>frontend/.env</code>.</li>
+  <li><strong>Solution:</strong> Create <code>frontend/.env</code> with the exact Supabase credentials shown in Step 2, then restart the Vite server.</li>
+</ul>
+
+<div class="alert alert-warning">
+  <strong>⚠️ Issue 3: PowerShell Script Execution Error (<code>Activate.ps1 cannot be loaded</code>)</strong>
+</div>
+<ul>
+  <li><strong>Why it occurs:</strong> Windows execution policies restrict running PowerShell scripts by default.</li>
+  <li><strong>Solution:</strong> In your PowerShell terminal, execute:
+    <div class="code-block">Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</div>
+    Then activate again with <code>.\venv\Scripts\Activate.ps1</code>.
+  </li>
+</ul>
+
+<div class="alert alert-warning">
+  <strong>⚠️ Issue 4: Port 8000 Already In Use</strong>
+</div>
+<ul>
+  <li><strong>Solution:</strong> Stop lingering Python processes in PowerShell:
+    <div class="code-block">Get-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess | Stop-Process -Force</div>
+  </li>
+</ul>
+
+<h2>🗺️ System Summary & Ports</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Stack</th>
+      <th>URL / Port</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>React + Vite + Tailwind</td>
+      <td><code>http://localhost:5173</code></td>
+      <td>Interactive UI, Candidate Profiles, Job Explorer, Skill Match Display</td>
+    </tr>
+    <tr>
+      <td><strong>Backend API</strong></td>
+      <td>FastAPI + Uvicorn</td>
+      <td><code>http://127.0.0.1:8000</code></td>
+      <td>JD Skill Extraction, Resume Parsing, Fuzzy Matching Engine</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>Supabase Cloud</td>
+      <td><code>gopyodujrpfbdutlagaf...</code></td>
+      <td>PostgreSQL storage for Profiles & Evaluation Reports</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>
