@@ -12,7 +12,8 @@ import {
   FileText,
   Award,
   GitCompare,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 import { useApp } from '../../hooks/useApp';
 import { useAuth } from '../../hooks/useAuth';
@@ -20,7 +21,7 @@ import { useAuth } from '../../hooks/useAuth';
 export default function TopNav({ mobileOpen, setMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { candidates, activeCandidate, switchActiveCandidate, isBackendOnline, addToast } = useApp();
+  const { candidates, activeCandidate, switchActiveCandidate, deleteCandidateProfile, isBackendOnline, addToast } = useApp();
   const { user, profile: customerProfile, signOut, isAuthenticated } = useAuth();
 
   const [candidateDropdownOpen, setCandidateDropdownOpen] = useState(false);
@@ -287,11 +288,83 @@ export default function TopNav({ mobileOpen, setMobileOpen }) {
                   );
                 })}
 
+                {/* Uploaded / Custom Resumes */}
+                {candidates.filter(c => c.isResumeParsed || c.isCustom).length > 0 && (
+                  <>
+                    <div style={{ padding: '12px 14px 4px', borderTop: '1px solid var(--border-subtle)', fontSize: '10px', fontWeight: '700', color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>⭐ Uploaded Resumes</span>
+                      <span style={{ fontSize: '9px', fontWeight: '600', color: 'var(--text-muted)' }}>Custom</span>
+                    </div>
+                    {candidates.filter(c => c.isResumeParsed || c.isCustom).map((c) => {
+                      const isCurrent = c.id === activeCandidate?.id;
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            switchActiveCandidate(c.id);
+                            setCandidateDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: '8px 14px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            cursor: 'pointer',
+                            background: isCurrent ? 'var(--bg-surface-elevated)' : 'transparent',
+                            borderLeft: isCurrent ? '3px solid var(--accent-cyan)' : '3px solid transparent',
+                            transition: 'background 0.15s ease',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '26px',
+                              height: '26px',
+                              borderRadius: '6px',
+                              background: 'rgba(56, 189, 248, 0.15)',
+                              color: 'var(--accent-cyan)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: '700',
+                            }}
+                          >
+                            {c.avatar || 'CD'}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                              {c.name}
+                            </div>
+                            <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                              {c.skills?.length || 0} skills extracted
+                            </div>
+                          </div>
+                          {isCurrent && <Check size={14} color="var(--accent-cyan)" />}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Delete candidate profile "${c.name}"?`)) {
+                                deleteCandidateProfile(c.id);
+                              }
+                            }}
+                            className="btn-ghost"
+                            style={{ padding: '4px', color: 'var(--error)' }}
+                            title="Delete this candidate profile"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
                 <div style={{ padding: '12px 14px 4px', borderTop: '1px solid var(--border-subtle)', fontSize: '10px', fontWeight: '700', color: 'var(--text-subtle)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span>Benchmark Personas</span>
                   <span style={{ fontSize: '9px', fontWeight: '600', color: 'var(--accent-cyan)' }}>Reference</span>
                 </div>
-                {candidates.filter(c => !c.isCustomer).map((c) => {
+                {candidates.filter(c => !c.isCustomer && !c.isResumeParsed && !c.isCustom).map((c) => {
                   const isCurrent = c.id === activeCandidate?.id;
                   return (
                     <div

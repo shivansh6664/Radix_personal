@@ -14,7 +14,8 @@ import {
   UserPlus,
   Plus,
   UploadCloud,
-  GitCompare
+  GitCompare,
+  Trash2
 } from 'lucide-react';
 import { useApp } from '../hooks/useApp';
 import { apiClient } from '../services/api';
@@ -68,10 +69,12 @@ export default function SkillMatchingPage() {
     activeCandidate,
     candidates,
     switchActiveCandidate,
+    deleteCandidateProfile,
     jobs,
     selectedJob,
     setSelectedJob,
     addCustomJob,
+    deleteCustomJob,
     addToast,
     isDemoMode,
     isBackendOnline,
@@ -463,15 +466,33 @@ export default function SkillMatchingPage() {
                 : '👥 Benchmark Persona'}
             </span>
 
-            <button
-              type="button"
-              onClick={() => setIsResumeModalOpen(true)}
-              className="btn btn-outline btn-sm"
-              style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
-            >
-              <UserPlus size={13} />
-              <span>+ Upload New Resume</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {(activeCandidate?.isResumeParsed || activeCandidate?.isCustom) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Delete candidate profile "${activeCandidate.name}"?`)) {
+                      deleteCandidateProfile(activeCandidate.id);
+                    }
+                  }}
+                  className="btn-ghost"
+                  style={{ color: 'var(--error)', padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  title="Delete this candidate profile"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete Profile</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsResumeModalOpen(true)}
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
+              >
+                <UserPlus size={13} />
+                <span>+ Upload New Resume</span>
+              </button>
+            </div>
           </div>
 
           {/* Candidate Info Snippet */}
@@ -582,15 +603,33 @@ export default function SkillMatchingPage() {
                 : '🏢 Tier-1 Benchmark'}
             </span>
 
-            <button
-              type="button"
-              onClick={() => setIsJdModalOpen(true)}
-              className="btn btn-outline btn-sm"
-              style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
-            >
-              <Plus size={13} />
-              <span>+ Add Custom JD</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {(currentJob?.id?.startsWith('custom_') || currentJob?.sourceFile) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Delete custom JD "${currentJob.role}" at ${currentJob.company}?`)) {
+                      deleteCustomJob(currentJob.id);
+                    }
+                  }}
+                  className="btn-ghost"
+                  style={{ color: 'var(--error)', padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  title="Delete this custom JD"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete JD</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsJdModalOpen(true)}
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
+              >
+                <Plus size={13} />
+                <span>+ Add Custom JD</span>
+              </button>
+            </div>
           </div>
 
           {/* Job Info Snippet */}

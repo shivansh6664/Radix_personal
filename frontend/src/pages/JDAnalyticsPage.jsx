@@ -9,7 +9,8 @@ import {
   RefreshCw,
   BookOpen,
   Building2,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { useApp } from '../hooks/useApp';
 import { apiClient } from '../services/api';
@@ -32,7 +33,7 @@ const getCompanyBadgeStyle = (company) => {
 
 export default function JDAnalyticsPage() {
   const navigate = useNavigate();
-  const { selectedJob, setSelectedJob, addCustomJob, isDemoMode, isBackendOnline, addToast, activeCandidate } = useApp();
+  const { selectedJob, setSelectedJob, addCustomJob, deleteCustomJob, isDemoMode, isBackendOnline, addToast, activeCandidate } = useApp();
 
   const [activeJob, setActiveJob] = useState(selectedJob || SAMPLE_JOBS[0]);
   const [pastedText, setPastedText] = useState('');
@@ -651,10 +652,36 @@ export default function JDAnalyticsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span className="badge badge-primary">{activeJob.company}</span>
-              <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--success)', fontFamily: 'var(--font-mono)' }}>
-                {activeJob.ctc}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="badge badge-primary">{activeJob.company}</span>
+                {activeJob.sourceFile && (
+                  <span className="badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: 'var(--accent-cyan)' }}>
+                    Uploaded File
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--success)', fontFamily: 'var(--font-mono)' }}>
+                  {activeJob.ctc}
+                </span>
+                {(activeJob.id?.startsWith('custom_') || activeJob.sourceFile) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Delete custom JD "${activeJob.role}" at ${activeJob.company}?`)) {
+                        deleteCustomJob(activeJob.id);
+                        setActiveJob(SAMPLE_JOBS[0]);
+                      }
+                    }}
+                    className="btn-ghost"
+                    style={{ color: 'var(--error)', padding: '4px 8px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    title="Delete this custom JD"
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete JD</span>
+                  </button>
+                )}
+              </div>
             </div>
             <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
               {activeJob.role}

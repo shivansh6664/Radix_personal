@@ -77,6 +77,29 @@ export const jobService = {
     return jobData;
   },
 
+  async deleteJob(jobId) {
+    const jobs = getLocalJobs();
+    const updated = jobs.filter((j) => j.id !== jobId);
+    localStorage.setItem(LOCAL_JOBS_KEY, JSON.stringify(updated));
+
+    const storedSelectedId = localStorage.getItem('radix_selected_job_id_v1');
+    if (storedSelectedId === jobId) {
+      const nextJob = updated[0] || SAMPLE_JOBS[0];
+      localStorage.setItem('radix_selected_job_id_v1', nextJob.id);
+    }
+
+    if (isSupabaseConfigured() && supabase) {
+      try {
+        await supabase.from('job_descriptions').delete().eq('id', jobId);
+      } catch (err) {
+        console.warn('Supabase delete job notice:', err);
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('radix_jobs_updated'));
+    return updated;
+  },
+
   resetDefaults() {
     localStorage.setItem(LOCAL_JOBS_KEY, JSON.stringify(SAMPLE_JOBS));
     window.dispatchEvent(new CustomEvent('radix_jobs_updated'));

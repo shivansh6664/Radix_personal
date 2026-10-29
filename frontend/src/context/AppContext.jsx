@@ -168,15 +168,45 @@ export function AppProvider({ children }) {
     setSelectedJob(newJob);
   }, [setSelectedJob]);
 
+  const deleteCandidateProfile = useCallback(async (profileId) => {
+    try {
+      await profileService.deleteProfile(profileId);
+      setCandidates((prev) => prev.filter((c) => c.id !== profileId));
+      if (activeCandidate?.id === profileId) {
+        const remaining = candidates.filter((c) => c.id !== profileId);
+        setActiveCandidate(remaining[0] || null);
+      }
+      addToast('Candidate profile removed', 'info');
+    } catch (e) {
+      addToast(`Error removing profile: ${e.message}`, 'error');
+    }
+  }, [candidates, activeCandidate, addToast]);
+
+  const deleteCustomJob = useCallback(async (jobId) => {
+    try {
+      await jobService.deleteJob(jobId);
+      setJobs((prev) => prev.filter((j) => j.id !== jobId));
+      if (selectedJob?.id === jobId) {
+        const remaining = jobs.filter((j) => j.id !== jobId);
+        setSelectedJob(remaining[0] || null);
+      }
+      addToast('Job description removed', 'info');
+    } catch (e) {
+      addToast(`Error deleting JD: ${e.message}`, 'error');
+    }
+  }, [jobs, selectedJob, addToast, setSelectedJob]);
+
   const value = {
     candidates,
     activeCandidate,
     setActiveCandidate,
     switchActiveCandidate,
+    deleteCandidateProfile,
     jobs,
     selectedJob,
     setSelectedJob,
     addCustomJob,
+    deleteCustomJob,
     selectedCompany,
     setSelectedCompany,
     isBackendOnline,

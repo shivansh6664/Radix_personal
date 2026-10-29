@@ -324,6 +324,21 @@ export const profileService = {
     return newCandidate;
   },
 
+  async deleteProfile(profileId) {
+    const profiles = getLocalProfiles();
+    const updated = profiles.filter((p) => p.id !== profileId);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+
+    const activeId = this.getActiveProfileId();
+    if (activeId === profileId) {
+      const nextActive = updated[0]?.id || SAMPLE_CANDIDATES[0].id;
+      this.setActiveProfileId(nextActive);
+      window.dispatchEvent(new CustomEvent('radix_profile_changed', { detail: { id: nextActive } }));
+    }
+    window.dispatchEvent(new CustomEvent('radix_profiles_updated'));
+    return updated;
+  },
+
   resetDefaults() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(SAMPLE_CANDIDATES));
     localStorage.setItem(ACTIVE_PROFILE_KEY, SAMPLE_CANDIDATES[0].id);
