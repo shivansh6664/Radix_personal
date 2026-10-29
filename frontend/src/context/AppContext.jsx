@@ -40,13 +40,18 @@ export function AppProvider({ children }) {
       const loadedCandidates = await profileService.getProfiles(customerProfile);
       const loadedJobs = await jobService.getJobs();
 
-      // If user is authenticated, default to customer profile
+      // Respect the active profile ID if selected, otherwise fallback to customer profile or first candidate
+      const activeId = profileService.getActiveProfileId();
       let current = null;
-      if (isAuthenticated && customerProfile) {
-        current = customerProfile;
-      } else {
-        const activeId = profileService.getActiveProfileId();
-        current = loadedCandidates.find((c) => c.id === activeId) || loadedCandidates[0];
+      if (activeId) {
+        current = loadedCandidates.find((c) => c.id === activeId);
+      }
+      if (!current) {
+        if (isAuthenticated && customerProfile) {
+          current = customerProfile;
+        } else {
+          current = loadedCandidates[0];
+        }
       }
 
       setCandidates(loadedCandidates);
@@ -64,11 +69,14 @@ export function AppProvider({ children }) {
   // Sync customer profile when authentication state changes
   useEffect(() => {
     if (isAuthenticated && customerProfile) {
-      setActiveCandidate(customerProfile);
       setCandidates((prev) => {
         const filtered = prev.filter((p) => p.id !== customerProfile.id);
         return [customerProfile, ...filtered];
       });
+      const activeId = profileService.getActiveProfileId();
+      if (!activeId || activeId === customerProfile.id) {
+        setActiveCandidate(customerProfile);
+      }
     }
   }, [isAuthenticated, customerProfile]);
 
@@ -83,10 +91,10 @@ export function AppProvider({ children }) {
       setActiveCandidate(current);
     };
 
-    const handleProfilesUpdated = async () => {
+    const handleProfilesUpdated = async (e) => {
       const loadedCandidates = await profileService.getProfiles(customerProfile);
       setCandidates(loadedCandidates);
-      const activeId = profileService.getActiveProfileId();
+      const activeId = e?.detail?.profileId || profileService.getActiveProfileId();
       const current = loadedCandidates.find((c) => c.id === activeId) || loadedCandidates[0];
       setActiveCandidate(current);
     };

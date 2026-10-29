@@ -267,6 +267,63 @@ export const profileService = {
     return this.saveProfile(updatedProfile);
   },
 
+  async createProfileFromResume(resumeData) {
+    const rawName = (resumeData.candidateName || resumeData.name || 'New Candidate').trim();
+    const candidateName = rawName || 'Candidate Profile';
+    const skills = Array.isArray(resumeData.skills) ? resumeData.skills : [];
+    const education = resumeData.education || 'B.Tech Computer Science & Engineering';
+    const email = resumeData.email || `${candidateName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@radix.edu`;
+    const newId = `candidate_${Date.now()}`;
+    const initials = candidateName
+      .split(' ')
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase() || 'CD';
+
+    const categoryLevels = computeCategoryLevels(skills);
+
+    const newCandidate = {
+      id: newId,
+      name: candidateName,
+      email: email,
+      avatar: initials,
+      isCustom: true,
+      isResumeParsed: true,
+      education: typeof education === 'string' ? education : (education[0]?.degree || 'B.Tech / Degree'),
+      educationList: Array.isArray(education) ? education : [{ degree: education, institution: 'University', year: '2024' }],
+      skills: skills.map((s) => ({
+        skill_name: s.skill_name || s.name || 'Competency',
+        category_code: s.category_code || 'SWE',
+        evidence: s.evidence || 'Extracted from resume upload',
+        confidence: s.confidence || 'high',
+        proficiency: Number(s.proficiency || s.level) || (s.confidence === 'high' ? 8 : s.confidence === 'medium' ? 6 : 4),
+      })),
+      categories: categoryLevels,
+      categoryScores: categoryLevels,
+      projects: Array.isArray(resumeData.projects) ? resumeData.projects : [],
+      certifications: Array.isArray(resumeData.certifications) ? resumeData.certifications : [],
+      experience: Array.isArray(resumeData.experience) ? resumeData.experience : [],
+      internships: Array.isArray(resumeData.experience) ? resumeData.experience : [],
+      hackathons: [],
+      preferredRoles: [resumeData.targetRole || 'Software Engineer'],
+      fitSummary: skills.length > 0
+        ? `Dedicated candidate profile parsed from resume with ${skills.length} verified competencies.`
+        : 'Newly created candidate profile.',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const profiles = getLocalProfiles();
+    const updated = [newCandidate, ...profiles];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+    this.setActiveProfileId(newCandidate.id);
+    window.dispatchEvent(new CustomEvent('radix_profiles_updated', { detail: { profileId: newCandidate.id } }));
+    window.dispatchEvent(new CustomEvent('radix_profile_changed', { detail: { id: newCandidate.id } }));
+    return newCandidate;
+  },
+
   resetDefaults() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(SAMPLE_CANDIDATES));
     localStorage.setItem(ACTIVE_PROFILE_KEY, SAMPLE_CANDIDATES[0].id);

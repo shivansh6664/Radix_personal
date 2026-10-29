@@ -7,12 +7,28 @@ import {
   CheckCircle2,
   GitCompare,
   RefreshCw,
-  BookOpen
+  BookOpen,
+  Building2,
+  FileText
 } from 'lucide-react';
 import { useApp } from '../hooks/useApp';
 import { apiClient } from '../services/api';
 import { SAMPLE_JOBS, RADIX_CATEGORIES } from '../lib/radixData';
 import Card from '../components/ui/Card';
+
+const getCompanyBadgeStyle = (company) => {
+  const c = company?.toLowerCase() || '';
+  if (c.includes('google')) {
+    return { bg: 'rgba(66, 133, 244, 0.14)', color: '#60A5FA', border: 'rgba(66, 133, 244, 0.35)' };
+  }
+  if (c.includes('microsoft')) {
+    return { bg: 'rgba(0, 164, 239, 0.14)', color: '#38BDF8', border: 'rgba(0, 164, 239, 0.35)' };
+  }
+  if (c.includes('oracle')) {
+    return { bg: 'rgba(234, 67, 53, 0.14)', color: '#FB7185', border: 'rgba(234, 67, 53, 0.35)' };
+  }
+  return { bg: 'rgba(129, 140, 248, 0.14)', color: '#A5B4FC', border: 'rgba(129, 140, 248, 0.35)' };
+};
 
 export default function JDAnalyticsPage() {
   const navigate = useNavigate();
@@ -230,56 +246,282 @@ export default function JDAnalyticsPage() {
         </button>
       </div>
 
-      {/* Input Options: Sample Selector vs Upload vs Paste */}
-      <Card>
-        <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-md)', padding: '3px', border: '1px solid var(--border-subtle)', width: 'fit-content', marginBottom: '20px' }}>
-          {[
-            { id: 'sample', label: 'Select Benchmark JD' },
-            { id: 'paste', label: 'Paste Job Description' },
-            { id: 'upload', label: 'Upload Document (PDF/DOCX)' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`btn-ghost ${activeTab === tab.id ? 'btn-primary' : ''}`}
-              style={{ padding: '6px 14px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}
+      {/* 3 Prominent Mobbin Mode Selector Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        {/* Card 1: Benchmark JD */}
+        <div
+          onClick={() => setActiveTab('sample')}
+          style={{
+            padding: '22px 24px',
+            borderRadius: 'var(--radius-lg)',
+            background: activeTab === 'sample'
+              ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(15, 23, 42, 0.88) 100%)'
+              : 'var(--bg-surface)',
+            border: activeTab === 'sample' ? '1.5px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+            boxShadow: activeTab === 'sample' ? '0 0 24px rgba(56, 189, 248, 0.22)' : 'var(--shadow-sm)',
+            cursor: 'pointer',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {activeTab === 'sample' && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #38BDF8, #818CF8)' }} />
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: activeTab === 'sample' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                border: `1px solid ${activeTab === 'sample' ? 'rgba(56, 189, 248, 0.4)' : 'var(--border-subtle)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: activeTab === 'sample' ? 'var(--accent-cyan)' : 'var(--text-muted)',
+              }}
             >
-              {tab.label}
-            </button>
-          ))}
+              <Building2 size={22} />
+            </div>
+            <span
+              className="badge"
+              style={{
+                background: activeTab === 'sample' ? 'rgba(56, 189, 248, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'sample' ? 'var(--accent-cyan)' : 'var(--text-subtle)',
+                border: `1px solid ${activeTab === 'sample' ? 'rgba(56, 189, 248, 0.35)' : 'var(--border-subtle)'}`,
+                fontWeight: '700',
+                fontSize: '11px',
+                padding: '4px 10px',
+              }}
+            >
+              6 BENCHMARKS
+            </span>
+          </div>
+
+          <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+            Select Benchmark JD
+          </div>
+          <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+            Curated hiring standards from Google, Microsoft, and Oracle with verified 12-category weights.
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '14px', fontSize: '11.5px', color: activeTab === 'sample' ? 'var(--accent-cyan)' : 'var(--text-subtle)', fontWeight: '700' }}>
+            <CheckCircle2 size={13} color={activeTab === 'sample' ? 'var(--accent-cyan)' : 'var(--text-subtle)'} />
+            <span>{activeTab === 'sample' ? 'Active Workflow Mode' : 'Click to explore benchmarks'}</span>
+          </div>
         </div>
 
+        {/* Card 2: Paste Job Description */}
+        <div
+          onClick={() => setActiveTab('paste')}
+          style={{
+            padding: '22px 24px',
+            borderRadius: 'var(--radius-lg)',
+            background: activeTab === 'paste'
+              ? 'linear-gradient(135deg, rgba(129, 140, 248, 0.14) 0%, rgba(15, 23, 42, 0.88) 100%)'
+              : 'var(--bg-surface)',
+            border: activeTab === 'paste' ? '1.5px solid var(--accent-violet)' : '1px solid var(--border-subtle)',
+            boxShadow: activeTab === 'paste' ? '0 0 24px rgba(129, 140, 248, 0.22)' : 'var(--shadow-sm)',
+            cursor: 'pointer',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {activeTab === 'paste' && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #818CF8, #C084FC)' }} />
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: activeTab === 'paste' ? 'rgba(129, 140, 248, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                border: `1px solid ${activeTab === 'paste' ? 'rgba(129, 140, 248, 0.4)' : 'var(--border-subtle)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: activeTab === 'paste' ? 'var(--accent-violet)' : 'var(--text-muted)',
+              }}
+            >
+              <FileText size={22} />
+            </div>
+            <span
+              className="badge"
+              style={{
+                background: activeTab === 'paste' ? 'rgba(129, 140, 248, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'paste' ? 'var(--accent-violet)' : 'var(--text-subtle)',
+                border: `1px solid ${activeTab === 'paste' ? 'rgba(129, 140, 248, 0.35)' : 'var(--border-subtle)'}`,
+                fontWeight: '700',
+                fontSize: '11px',
+                padding: '4px 10px',
+              }}
+            >
+              RAW TEXT PARSER
+            </span>
+          </div>
+
+          <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+            Paste Job Description
+          </div>
+          <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+            Paste raw requirements from LinkedIn, Indeed, or career portals for custom NLP parsing.
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '14px', fontSize: '11.5px', color: activeTab === 'paste' ? 'var(--accent-violet)' : 'var(--text-subtle)', fontWeight: '700' }}>
+            <CheckCircle2 size={13} color={activeTab === 'paste' ? 'var(--accent-violet)' : 'var(--text-subtle)'} />
+            <span>{activeTab === 'paste' ? 'Active Workflow Mode' : 'Click to paste raw JD'}</span>
+          </div>
+        </div>
+
+        {/* Card 3: Upload Document */}
+        <div
+          onClick={() => setActiveTab('upload')}
+          style={{
+            padding: '22px 24px',
+            borderRadius: 'var(--radius-lg)',
+            background: activeTab === 'upload'
+              ? 'linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(15, 23, 42, 0.88) 100%)'
+              : 'var(--bg-surface)',
+            border: activeTab === 'upload' ? '1.5px solid var(--success)' : '1px solid var(--border-subtle)',
+            boxShadow: activeTab === 'upload' ? '0 0 24px rgba(52, 211, 153, 0.22)' : 'var(--shadow-sm)',
+            cursor: 'pointer',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {activeTab === 'upload' && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #34D399, #38BDF8)' }} />
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: activeTab === 'upload' ? 'rgba(52, 211, 153, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                border: `1px solid ${activeTab === 'upload' ? 'rgba(52, 211, 153, 0.4)' : 'var(--border-subtle)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: activeTab === 'upload' ? 'var(--success)' : 'var(--text-muted)',
+              }}
+            >
+              <UploadCloud size={22} />
+            </div>
+            <span
+              className="badge"
+              style={{
+                background: activeTab === 'upload' ? 'rgba(52, 211, 153, 0.16)' : 'rgba(255, 255, 255, 0.04)',
+                color: activeTab === 'upload' ? 'var(--success)' : 'var(--text-subtle)',
+                border: `1px solid ${activeTab === 'upload' ? 'rgba(52, 211, 153, 0.35)' : 'var(--border-subtle)'}`,
+                fontWeight: '700',
+                fontSize: '11px',
+                padding: '4px 10px',
+              }}
+            >
+              PDF / DOCX
+            </span>
+          </div>
+
+          <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}>
+            Upload JD Document
+          </div>
+          <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: '1.45' }}>
+            Drop or browse employer JD documents for automated competency extraction.
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '14px', fontSize: '11.5px', color: activeTab === 'upload' ? 'var(--success)' : 'var(--text-subtle)', fontWeight: '700' }}>
+            <CheckCircle2 size={13} color={activeTab === 'upload' ? 'var(--success)' : 'var(--text-subtle)'} />
+            <span>{activeTab === 'upload' ? 'Active Workflow Mode' : 'Click to upload JD file'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Mode Content Panel */}
+      <Card>
         {activeTab === 'sample' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
-            {SAMPLE_JOBS.map((job) => {
-              const isSelected = activeJob.id === job.id;
-              return (
-                <div
-                  key={job.id}
-                  onClick={() => handleSelectSampleJob(job)}
-                  style={{
-                    padding: '16px 18px',
-                    borderRadius: 'var(--radius-md)',
-                    background: isSelected ? 'var(--bg-surface-elevated)' : 'rgba(255, 255, 255, 0.02)',
-                    border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                    boxShadow: isSelected ? '0 0 16px rgba(56, 189, 248, 0.12)' : 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.16s ease',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span className="badge badge-primary">{job.companyShort || job.company}</span>
-                    <span style={{ fontSize: '10.5px', color: 'var(--text-subtle)', fontWeight: '600' }}>{job.roleCategory}</span>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  Tier-1 Hiring Standards Roster
+                </h3>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                  Select an enterprise benchmark below to inspect required competencies and match candidates.
+                </p>
+              </div>
+              <span className="badge badge-primary">
+                {activeJob ? `Selected: ${activeJob.company} (${activeJob.role})` : 'Select a benchmark'}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+              {SAMPLE_JOBS.map((job) => {
+                const isSelected = activeJob.id === job.id;
+                const badgeStyle = getCompanyBadgeStyle(job.company);
+                return (
+                  <div
+                    key={job.id}
+                    onClick={() => handleSelectSampleJob(job)}
+                    style={{
+                      padding: '18px 20px',
+                      borderRadius: 'var(--radius-lg)',
+                      background: isSelected
+                        ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(15, 23, 42, 0.95) 100%)'
+                        : 'rgba(255, 255, 255, 0.02)',
+                      border: isSelected ? '1.5px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
+                      boxShadow: isSelected ? '0 0 20px rgba(56, 189, 248, 0.18)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: '800',
+                          padding: '3px 8px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: badgeStyle.bg,
+                          color: badgeStyle.color,
+                          border: `1px solid ${badgeStyle.border}`,
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {job.companyShort || job.company}
+                      </span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-subtle)', fontWeight: '600' }}>
+                        {job.roleCategory}
+                      </span>
+                    </div>
+
+                    <div style={{ fontWeight: '800', fontSize: '15px', color: isSelected ? '#FFFFFF' : 'var(--text-primary)', marginBottom: '6px', letterSpacing: '-0.01em' }}>
+                      {job.role}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)' }}>
+                      <span>{job.location}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--success)', fontWeight: '600' }}>
+                        {job.ctc}
+                      </span>
+                    </div>
+
+                    {isSelected && (
+                      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(56, 189, 248, 0.2)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--accent-cyan)', fontWeight: '700' }}>
+                        <CheckCircle2 size={13} />
+                        <span>Selected for Evaluation</span>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontWeight: '700', fontSize: '14px', color: isSelected ? '#FFFFFF' : 'var(--text-primary)' }}>
-                    {job.role}
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    {job.location} · {job.ctc}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
