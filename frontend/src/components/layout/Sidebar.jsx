@@ -38,16 +38,16 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       title: 'Core Workflow',
       items: [
         { name: 'Overview', path: '/', icon: LayoutDashboard },
-        { name: 'JD Analytics', path: '/jd-analytics', icon: FileSearch, badge: 'Role 1' },
-        { name: 'Resume Analyzer', path: '/resume-analyzer', icon: FileText, badge: 'Role 2' },
-        { name: 'Talent Insights', path: '/talent-insights', icon: Award, badge: 'Role 4' },
-        { name: 'Skill Matching', path: '/skill-matching', icon: GitCompare, badge: 'Role 5' },
+        { name: 'JD Analytics', path: '/jd-analytics', icon: FileSearch },
+        { name: 'Resume Analyzer', path: '/resume-analyzer', icon: FileText },
+        { name: 'Talent Insights', path: '/talent-insights', icon: Award },
+        { name: 'Skill Matching', path: '/skill-matching', icon: GitCompare },
       ],
     },
     {
       title: 'Talent & Repository',
       items: [
-        { name: 'My Profile', path: '/profile', icon: User, badge: 'Role 3' },
+        { name: 'My Profile', path: '/profile', icon: User },
         { name: 'Job Explorer', path: '/job-explorer', icon: Briefcase },
         { name: 'Saved Reports', path: '/saved-reports', icon: Bookmark },
       ],

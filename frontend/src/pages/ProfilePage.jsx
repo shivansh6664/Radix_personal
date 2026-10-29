@@ -353,7 +353,7 @@ export default function ProfilePage() {
               className="form-input"
               value={formData.name}
               onChange={handleInputChange}
-              placeholder="e.g. Ananya Rao"
+              placeholder="e.g. Rohan Verma"
               required
             />
           </div>
@@ -366,7 +366,7 @@ export default function ProfilePage() {
               className="form-input"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="e.g. ananya.rao@example.com"
+              placeholder="e.g. rohan.verma@example.com"
             />
           </div>
 
@@ -400,7 +400,7 @@ export default function ProfilePage() {
               type="text"
               name="cvFile"
               className="form-input"
-              value={formData.cvFile || 'Ananya Rao.docx'}
+              value={formData.cvFile || 'Rohan Verma.docx'}
               onChange={handleInputChange}
               placeholder="Filename"
             />

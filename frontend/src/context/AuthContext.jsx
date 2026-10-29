@@ -272,7 +272,7 @@ export function AuthProvider({ children }) {
     setProfile(null);
   };
 
-  const demoLogin = (candidateId = 'ananya-rao') => {
+  const demoLogin = (candidateId = 'rohan-verma') => {
     const demoCandidate = SAMPLE_CANDIDATES.find(c => c.id === candidateId) || SAMPLE_CANDIDATES[0];
     const demoUser = {
       id: demoCandidate.id,

@@ -180,7 +180,7 @@ export default function SettingsPage() {
               Reset Reference Candidates & Job Openings
             </h4>
             <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', maxWidth: '520px' }}>
-              Restores all reference candidates (Ananya Rao, Karthik Subramaniam, Priya Menon, Rohan Verma) and curated job descriptions to default.
+              Restores benchmark candidate (Rohan Verma) and curated job descriptions to default.
             </p>
           </div>
 

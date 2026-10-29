@@ -235,7 +235,7 @@ export default function JDAnalyticsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
-            Job Description Analytics (Role 1)
+            Job Description Analytics
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             Parse employer JDs, extract core competencies mapped to 12 RADIX standards, and prepare for candidate matching.

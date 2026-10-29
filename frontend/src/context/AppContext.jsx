@@ -102,6 +102,20 @@ export function AppProvider({ children }) {
   }, [isAuthenticated, customerProfile]);
 
   useEffect(() => {
+    if (!isBackendOnline) {
+      const timer = setInterval(async () => {
+        const health = await apiClient.checkHealth();
+        if (health.isOnline) {
+          setIsBackendOnline(true);
+          setIsDemoMode(false);
+          clearInterval(timer);
+        }
+      }, 10000);
+      return () => clearInterval(timer);
+    }
+  }, [isBackendOnline]);
+
+  useEffect(() => {
     loadData();
 
     const handleProfileChanged = async (e) => {

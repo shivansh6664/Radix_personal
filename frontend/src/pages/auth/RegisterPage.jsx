@@ -278,7 +278,7 @@ export default function RegisterPage() {
                       type="text"
                       className="form-input"
                       style={{ paddingLeft: '38px' }}
-                      placeholder="e.g. Ananya Rao"
+                      placeholder="e.g. Rohan Verma"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required

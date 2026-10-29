@@ -46,10 +46,7 @@ export default function ResumeAnalyzerPage() {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const sampleResumes = [
-    { name: 'Ananya Rao.docx', candidateId: 'ananya-rao', size: '15.8 KB', role: 'SWE Leaning', candidate: SAMPLE_CANDIDATES[0] },
-    { name: 'Karthik Subramaniam.docx', candidateId: 'karthik-subramaniam', size: '15.7 KB', role: 'Data Leaning', candidate: SAMPLE_CANDIDATES[1] },
-    { name: 'Priya Menon.docx', candidateId: 'priya-menon', size: '19.4 KB', role: 'Support Leaning', candidate: SAMPLE_CANDIDATES[2] },
-    { name: 'Rohan Verma.docx', candidateId: 'rohan-verma', size: '17.6 KB', role: 'All-Rounder', candidate: SAMPLE_CANDIDATES[3] },
+    { name: 'Rohan Verma.docx', candidateId: 'rohan-verma', size: '17.6 KB', role: 'Benchmark Candidate (All-Rounder)', candidate: SAMPLE_CANDIDATES[0] },
   ];
 
   const handleSelectSample = (sample) => {
@@ -227,7 +224,7 @@ export default function ResumeAnalyzerPage() {
       {/* Page Title */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
-          Resume Analyzer (Role 2)
+          Resume Analyzer
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
           Automate candidate skill extraction, quote verified evidence, and map directly to 12 RADIX standards.

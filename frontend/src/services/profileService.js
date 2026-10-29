@@ -1,8 +1,8 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { SAMPLE_CANDIDATES } from '../lib/radixData';
 
-const LOCAL_STORAGE_KEY = 'radix_candidate_profiles_v1';
-const ACTIVE_PROFILE_KEY = 'radix_active_profile_id_v1';
+const LOCAL_STORAGE_KEY = 'radix_candidate_profiles_v2';
+const ACTIVE_PROFILE_KEY = 'radix_active_profile_id_v2';
 
 // Read cached profiles from local storage fallback
 const getLocalProfiles = () => {
@@ -10,7 +10,11 @@ const getLocalProfiles = () => {
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const legacy = ['ananya-rao', 'karthik-subramaniam', 'priya-menon'];
+        const filtered = parsed.filter(p => !legacy.includes(p.id));
+        if (filtered.length > 0) return filtered;
+      }
     }
   } catch (e) {
     console.warn('Failed to parse local candidate profiles:', e);

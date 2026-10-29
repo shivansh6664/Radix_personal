@@ -24,16 +24,16 @@ class ApiClient {
   async checkHealth() {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       let res;
       try {
-        res = await fetch(`${this.baseUrl}/docs`, {
-          method: 'HEAD',
+        res = await fetch(`${this.baseUrl}/api/health`, {
           signal: controller.signal,
         });
       } catch {
-        res = await fetch(`${this.baseUrl}/api/health`, {
+        res = await fetch(`${this.baseUrl}/docs`, {
+          method: 'HEAD',
           signal: controller.signal,
         });
       } finally {
