@@ -4,10 +4,12 @@ const API_BASE_URL =
 
 const ROLE5_API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ROLE5_API_URL) ||
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
   'http://127.0.0.1:8001';
 
 const ROLE2_API_BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ROLE2_API_URL) ||
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
   'http://127.0.0.1:8002';
 
 class ApiClient {
