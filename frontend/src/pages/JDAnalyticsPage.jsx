@@ -209,7 +209,8 @@ export default function JDAnalyticsPage() {
         };
 
         setActiveJob(customAnalyzedJob);
-        setSelectedJob(customAnalyzedJob);
+        if (addCustomJob) addCustomJob(customAnalyzedJob);
+        else setSelectedJob(customAnalyzedJob);
         addToast(`Extracted ${detectedSkills.length} competencies using RADIX Analyzer`, 'success');
       }
     } catch (err) {
@@ -221,6 +222,9 @@ export default function JDAnalyticsPage() {
 
   const handleRouteToMatch = () => {
     setSelectedJob(activeJob);
+    if (activeJob?.id) {
+      localStorage.setItem('radix_selected_job_id_v1', activeJob.id);
+    }
     navigate('/skill-matching');
   };
 

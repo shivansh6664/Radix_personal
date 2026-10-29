@@ -5,18 +5,28 @@ import { apiClient } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { AppContext } from './AppContextDef';
 
+const SELECTED_JOB_KEY = 'radix_selected_job_id_v1';
+
 export function AppProvider({ children }) {
   const { user, profile: customerProfile, isAuthenticated } = useAuth();
 
   const [candidates, setCandidates] = useState([]);
   const [activeCandidate, setActiveCandidate] = useState(null);
   const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJob, setSelectedJobState] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState('Google LLC');
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState([]);
+
+  const setSelectedJob = useCallback((job) => {
+    if (!job) return;
+    setSelectedJobState(job);
+    if (job.id) {
+      localStorage.setItem(SELECTED_JOB_KEY, job.id);
+    }
+  }, []);
 
   const addToast = useCallback((message, type = 'info', duration = 3500) => {
     const id = Date.now() + Math.random();
@@ -57,7 +67,18 @@ export function AppProvider({ children }) {
       setCandidates(loadedCandidates);
       setActiveCandidate(current);
       setJobs(loadedJobs);
-      setSelectedJob(loadedJobs[0]);
+
+      // Restore previously selected job if available, else fallback
+      const storedJobId = localStorage.getItem(SELECTED_JOB_KEY);
+      let targetJob = null;
+      if (storedJobId) {
+        targetJob = loadedJobs.find((j) => j.id === storedJobId);
+      }
+      setSelectedJobState((prev) => {
+        if (targetJob) return targetJob;
+        if (prev && loadedJobs.some((j) => j.id === prev.id)) return prev;
+        return loadedJobs[0];
+      });
     } catch (err) {
       console.error('Error loading initial state:', err);
       addToast('Error loading application data', 'error');
@@ -102,6 +123,11 @@ export function AppProvider({ children }) {
     const handleJobsUpdated = async () => {
       const loadedJobs = await jobService.getJobs();
       setJobs(loadedJobs);
+      const storedJobId = localStorage.getItem(SELECTED_JOB_KEY);
+      if (storedJobId) {
+        const found = loadedJobs.find((j) => j.id === storedJobId);
+        if (found) setSelectedJobState(found);
+      }
     };
 
     window.addEventListener('radix_profile_changed', handleProfileChanged);
@@ -128,14 +154,19 @@ export function AppProvider({ children }) {
     setIsDemoMode(val !== undefined ? val : (prev) => !prev);
   }, []);
 
-  const addCustomJob = useCallback((newJob) => {
+  const addCustomJob = useCallback(async (newJob) => {
     if (!newJob) return;
+    try {
+      await jobService.saveJob(newJob);
+    } catch (e) {
+      console.warn('Failed to persist custom job:', e);
+    }
     setJobs((prev) => {
       const filtered = prev.filter((j) => j.id !== newJob.id);
       return [newJob, ...filtered];
     });
     setSelectedJob(newJob);
-  }, []);
+  }, [setSelectedJob]);
 
   const value = {
     candidates,

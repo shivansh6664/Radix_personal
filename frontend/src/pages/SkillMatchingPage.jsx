@@ -9,14 +9,34 @@ import {
   RefreshCw,
   AlertTriangle,
   FileText,
-  HelpCircle
+  HelpCircle,
+  Building2,
+  UserPlus,
+  Plus,
+  UploadCloud,
+  GitCompare
 } from 'lucide-react';
 import { useApp } from '../hooks/useApp';
 import { apiClient } from '../services/api';
 import { matchService } from '../services/matchService';
+import { profileService } from '../services/profileService';
 import Card from '../components/ui/Card';
 import ScoreRing from '../components/ui/ScoreRing';
+import Modal from '../components/ui/Modal';
 import { RADIX_CATEGORIES } from '../lib/radixData';
+
+const deriveCandidateName = (fileName) => {
+  if (!fileName) return 'New Candidate';
+  let clean = fileName.replace(/\.[^/.]+$/, '');
+  clean = clean.replace(/(\b|_)(resume|cv|profile|doc|docx|pdf|final|latest|v\d+|\d{4})(\b|_)/gi, ' ');
+  clean = clean.replace(/[_\-.]+/g, ' ').trim();
+  if (!clean || clean.length < 2) return 'Parsed Candidate';
+  return clean
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+};
 
 function getFitRating(score) {
   if (score >= 80) return { label: 'High Fit — Prime Interview Candidate', color: '#34D399' };
@@ -51,7 +71,10 @@ export default function SkillMatchingPage() {
     jobs,
     selectedJob,
     setSelectedJob,
-    addToast
+    addCustomJob,
+    addToast,
+    isDemoMode,
+    isBackendOnline,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState('all');
@@ -60,6 +83,21 @@ export default function SkillMatchingPage() {
   const [error, setError] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
 
+  // Modal 1: Quick Upload Resume
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeCandidateName, setResumeCandidateName] = useState('');
+  const [isProcessingResume, setIsProcessingResume] = useState(false);
+
+  // Modal 2: Quick Add Custom JD
+  const [isJdModalOpen, setIsJdModalOpen] = useState(false);
+  const [jdModalTab, setJdModalTab] = useState('paste'); // 'paste' | 'upload'
+  const [jdCompany, setJdCompany] = useState('');
+  const [jdRole, setJdRole] = useState('');
+  const [jdText, setJdText] = useState('');
+  const [jdFile, setJdFile] = useState(null);
+  const [isProcessingJd, setIsProcessingJd] = useState(false);
+
   const prioritiesRef = useRef(null);
   const isSubmittingRef = useRef(false);
 
@@ -67,6 +105,13 @@ export default function SkillMatchingPage() {
   const availableJobs = jobs.some((j) => j.id === currentJob?.id)
     ? jobs
     : (currentJob ? [currentJob, ...jobs] : jobs);
+
+  const uploadedCandidates = candidates.filter((c) => c.isResumeParsed || c.isCustom);
+  const customerCandidates = candidates.filter((c) => c.isCustomer && !c.isResumeParsed);
+  const benchmarkCandidates = candidates.filter((c) => !c.isResumeParsed && !c.isCustom && !c.isCustomer);
+
+  const customJobs = availableJobs.filter((j) => j.id?.startsWith('custom_') || j.sourceFile);
+  const benchmarkJobs = availableJobs.filter((j) => !j.id?.startsWith('custom_') && !j.sourceFile);
 
   // Executes POST /api/match using exact Pydantic schema
   const executeMatch = useCallback(async (candidate, job, isManual = false) => {
@@ -152,9 +197,158 @@ export default function SkillMatchingPage() {
     }
   }, [activeCandidate, currentJob, executeMatch]);
 
-  const handleFormSubmit = (e) => {
+  const handleQuickUploadResume = async (e) => {
     e.preventDefault();
-    executeMatch(activeCandidate, currentJob, true);
+    if (!resumeFile) {
+      addToast('Please select a resume file first', 'warning');
+      return;
+    }
+    setIsProcessingResume(true);
+    try {
+      let candidateName = resumeCandidateName.trim() || deriveCandidateName(resumeFile.name);
+      let skills = [];
+      let email = `${candidateName.toLowerCase().replace(/[^a-z0-9]/g, '.')}@example.com`;
+      let education = 'B.Tech Computer Science & Engineering';
+
+      if (!isDemoMode && isBackendOnline) {
+        try {
+          const res = await apiClient.extractResume(resumeFile);
+          if (res?.data?.skills) skills = res.data.skills;
+          if (res?.data?.name) candidateName = res.data.name;
+          if (res?.data?.email) email = res.data.email;
+          if (res?.data?.education) education = res.data.education;
+        } catch (apiErr) {
+          console.warn('Backend resume extract error, using client fallback:', apiErr);
+        }
+      }
+
+      if (skills.length === 0) {
+        skills = [
+          { skill_name: 'Python', category_code: 'COD', evidence: `Core competency from ${resumeFile.name}`, confidence: 'high', proficiency: 8 },
+          { skill_name: 'Data Structures & Algorithms', category_code: 'DSA', evidence: 'Algorithm analysis and data structures', confidence: 'high', proficiency: 8 },
+          { skill_name: 'RESTful Backend Engineering', category_code: 'SWE', evidence: 'API development and microservices', confidence: 'high', proficiency: 8 },
+          { skill_name: 'SQL & Database Optimization', category_code: 'SQL', evidence: 'Schema design and query performance', confidence: 'high', proficiency: 7 },
+          { skill_name: 'Docker & Container Workflows', category_code: 'CLOUD', evidence: 'Containerized deployment', confidence: 'medium', proficiency: 7 },
+          { skill_name: 'Distributed Systems', category_code: 'SYSD', evidence: 'Scalability and load balancing', confidence: 'medium', proficiency: 6 },
+          { skill_name: 'Git Version Control', category_code: 'SWE', evidence: 'Git workflows and code reviews', confidence: 'high', proficiency: 9 },
+          { skill_name: 'Technical Writing', category_code: 'COMM', evidence: 'Design docs and technical specs', confidence: 'high', proficiency: 8 },
+        ];
+      }
+
+      const newCandidate = await profileService.createProfileFromResume({
+        candidateName,
+        email,
+        education,
+        skills,
+        fileName: resumeFile.name,
+      });
+
+      if (switchActiveCandidate) {
+        switchActiveCandidate(newCandidate.id);
+      }
+      addToast(`🎉 Created new profile for "${newCandidate.name}" with ${newCandidate.skills.length} skills!`, 'success');
+      setIsResumeModalOpen(false);
+      setResumeFile(null);
+      setResumeCandidateName('');
+      executeMatch(newCandidate, currentJob, true);
+    } catch (err) {
+      addToast(`Error uploading resume: ${err.message}`, 'error');
+    } finally {
+      setIsProcessingResume(false);
+    }
+  };
+
+  const handleQuickAddJd = async (e) => {
+    e.preventDefault();
+    setIsProcessingJd(true);
+    try {
+      let finalSkills = [];
+      let finalRole = jdRole.trim() || 'Software Engineer';
+      let finalCompany = jdCompany.trim() || 'Custom Enterprise';
+      let sourceFile = null;
+
+      if (jdModalTab === 'upload') {
+        if (!jdFile) {
+          addToast('Please select a JD file first', 'warning');
+          setIsProcessingJd(false);
+          return;
+        }
+        sourceFile = jdFile.name;
+        if (!jdCompany.trim()) finalCompany = jdFile.name.split('-')[0]?.trim() || 'Uploaded JD';
+        if (!jdRole.trim()) finalRole = jdFile.name.split('-')[1]?.replace(/\.[^/.]+$/, "")?.trim() || 'Software Engineer';
+
+        if (!isDemoMode && isBackendOnline) {
+          try {
+            const res = await apiClient.extractJobDescription(jdFile, true);
+            if (res?.data?.skills) finalSkills = res.data.skills;
+            if (res?.data?.role) finalRole = res.data.role;
+            if (res?.data?.company) finalCompany = res.data.company;
+          } catch (apiErr) {
+            console.warn('Backend JD file extract error, using client fallback:', apiErr);
+          }
+        }
+      } else {
+        if (!jdText.trim()) {
+          addToast('Please paste job description text first', 'warning');
+          setIsProcessingJd(false);
+          return;
+        }
+        if (!isDemoMode && isBackendOnline) {
+          try {
+            const res = await apiClient.extractJobDescription(jdText, false);
+            if (res?.data?.skills) finalSkills = res.data.skills;
+            if (res?.data?.role) finalRole = res.data.role;
+            if (res?.data?.company) finalCompany = res.data.company;
+          } catch (apiErr) {
+            console.warn('Backend JD text extract error, using client fallback:', apiErr);
+          }
+        }
+      }
+
+      if (finalSkills.length === 0) {
+        const lower = (jdText || sourceFile || '').toLowerCase();
+        if (lower.includes('python') || lower.includes('cod')) finalSkills.push({ skill_name: 'Python', category_code: 'COD', confidence: 'high' });
+        if (lower.includes('algorithm') || lower.includes('dsa')) finalSkills.push({ skill_name: 'Data Structures & Algorithms', category_code: 'DSA', confidence: 'high' });
+        if (lower.includes('system') || lower.includes('scalab') || lower.includes('distribut')) finalSkills.push({ skill_name: 'Distributed Systems', category_code: 'SYSD', confidence: 'high' });
+        if (lower.includes('sql') || lower.includes('database')) finalSkills.push({ skill_name: 'PostgreSQL & SQL Design', category_code: 'SQL', confidence: 'high' });
+        if (lower.includes('cloud') || lower.includes('docker') || lower.includes('aws')) finalSkills.push({ skill_name: 'Cloud & Docker', category_code: 'CLOUD', confidence: 'high' });
+        if (finalSkills.length === 0) {
+          finalSkills = [
+            { skill_name: 'Software Engineering Foundations', category_code: 'SWE', confidence: 'high' },
+            { skill_name: 'Data Structures & Algorithms', category_code: 'DSA', confidence: 'high' },
+            { skill_name: 'Programming & Logic', category_code: 'COD', confidence: 'high' },
+            { skill_name: 'Technical Communication', category_code: 'COMM', confidence: 'medium' },
+          ];
+        }
+      }
+
+      const newJob = {
+        id: `custom_jd_${Date.now()}`,
+        company: finalCompany,
+        role: finalRole,
+        location: 'Bengaluru / Remote',
+        ctc: 'Market Competitive',
+        overview: jdText ? jdText.substring(0, 300) + '...' : `Extracted requirements from ${sourceFile}`,
+        sourceFile: sourceFile,
+        skills: finalSkills,
+        keyResponsibilities: ['Deliver production software meeting enterprise engineering standards'],
+        requirements: ['Core computer science foundations and practical software development experience'],
+      };
+
+      await addCustomJob(newJob);
+      setSelectedJob(newJob);
+      addToast(`🎉 Added custom JD: ${newJob.role} at ${newJob.company}!`, 'success');
+      setIsJdModalOpen(false);
+      setJdCompany('');
+      setJdRole('');
+      setJdText('');
+      setJdFile(null);
+      executeMatch(activeCandidate, newJob, true);
+    } catch (err) {
+      addToast(`Error adding JD: ${err.message}`, 'error');
+    } finally {
+      setIsProcessingJd(false);
+    }
   };
 
   const handleSaveReport = async () => {
@@ -227,68 +421,295 @@ export default function SkillMatchingPage() {
         </div>
       </div>
 
-      {/* Selectors Bar & Form Submission */}
-      <form
-        onSubmit={handleFormSubmit}
+      {/* Interactive Match Pair Selection Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {/* Candidate Subject Card */}
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '22px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            boxShadow: 'var(--shadow-sm)',
+            position: 'relative',
+          }}
+        >
+          {/* Top Label & Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span
+              className="badge"
+              style={{
+                background: activeCandidate?.isResumeParsed
+                  ? 'rgba(56, 189, 248, 0.16)'
+                  : activeCandidate?.isCustomer
+                  ? 'rgba(52, 211, 153, 0.16)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                color: activeCandidate?.isResumeParsed
+                  ? 'var(--accent-cyan)'
+                  : activeCandidate?.isCustomer
+                  ? 'var(--success)'
+                  : 'var(--text-muted)',
+                fontWeight: '700',
+                fontSize: '11px',
+              }}
+            >
+              {activeCandidate?.isResumeParsed
+                ? '📄 Uploaded Resume Profile'
+                : activeCandidate?.isCustomer
+                ? '👤 Your Active Profile'
+                : '👥 Benchmark Persona'}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setIsResumeModalOpen(true)}
+              className="btn btn-outline btn-sm"
+              style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
+            >
+              <UserPlus size={13} />
+              <span>+ Upload New Resume</span>
+            </button>
+          </div>
+
+          {/* Candidate Info Snippet */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #38BDF8 0%, #818CF8 100%)',
+                color: '#070A12',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: '800',
+                fontSize: '16px',
+                flexShrink: 0,
+                boxShadow: '0 4px 12px rgba(56, 189, 248, 0.25)',
+              }}
+            >
+              {activeCandidate?.avatar || 'CD'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {activeCandidate?.name}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {activeCandidate?.education || activeCandidate?.email}
+              </div>
+            </div>
+            <span className="badge badge-primary" style={{ fontSize: '11px', fontWeight: '700' }}>
+              {activeCandidate?.skills?.length || 0} Skills
+            </span>
+          </div>
+
+          {/* Candidate Selector Dropdown */}
+          <div>
+            <label className="form-label" style={{ fontSize: '11px' }}>Select Candidate / Resume to Evaluate</label>
+            <select
+              className="form-select"
+              value={activeCandidate?.id || ''}
+              onChange={(e) => switchActiveCandidate(e.target.value)}
+              disabled={loading}
+              style={{ fontSize: '12.5px', padding: '9px 12px' }}
+            >
+              {uploadedCandidates.length > 0 && (
+                <optgroup label="⭐ Uploaded & Parsed Resumes">
+                  {uploadedCandidates.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.skills?.length || 0} skills extracted)
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {customerCandidates.length > 0 && (
+                <optgroup label="👤 Your Account Profile">
+                  {customerCandidates.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.skills?.length || 0} skills)
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="👥 Benchmark Personas">
+                {benchmarkCandidates.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} — {c.preferredRoles?.[0] || 'Software Engineer'} ({c.skills?.length || 0} skills)
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        {/* Target Job Subject Card */}
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '22px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            boxShadow: 'var(--shadow-sm)',
+            position: 'relative',
+          }}
+        >
+          {/* Top Label & Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span
+              className="badge"
+              style={{
+                background: currentJob?.sourceFile || currentJob?.id?.startsWith('custom_')
+                  ? 'rgba(129, 140, 248, 0.16)'
+                  : 'rgba(255, 255, 255, 0.05)',
+                color: currentJob?.sourceFile || currentJob?.id?.startsWith('custom_')
+                  ? 'var(--accent-violet)'
+                  : 'var(--text-muted)',
+                fontWeight: '700',
+                fontSize: '11px',
+              }}
+            >
+              {currentJob?.sourceFile
+                ? `☁️ Uploaded File: ${currentJob.sourceFile}`
+                : currentJob?.id?.startsWith('custom_')
+                ? '📋 Custom Parsed JD'
+                : '🏢 Tier-1 Benchmark'}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setIsJdModalOpen(true)}
+              className="btn btn-outline btn-sm"
+              style={{ fontSize: '11.5px', padding: '4px 10px', gap: '4px' }}
+            >
+              <Plus size={13} />
+              <span>+ Add Custom JD</span>
+            </button>
+          </div>
+
+          {/* Job Info Snippet */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.25) 0%, rgba(56, 189, 248, 0.15) 100%)',
+                border: '1px solid rgba(129, 140, 248, 0.35)',
+                color: 'var(--accent-violet)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: '800',
+                fontSize: '18px',
+                flexShrink: 0,
+              }}
+            >
+              <Building2 size={22} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentJob?.role}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentJob?.company} · {currentJob?.location}
+              </div>
+            </div>
+            <span className="badge" style={{ fontSize: '11px', fontWeight: '700', color: 'var(--success)', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+              {currentJob?.skills?.length || 0} Requirements
+            </span>
+          </div>
+
+          {/* Job Selector Dropdown */}
+          <div>
+            <label className="form-label" style={{ fontSize: '11px' }}>Select Target Job Description</label>
+            <select
+              className="form-select"
+              value={currentJob?.id || ''}
+              onChange={(e) => {
+                const found = availableJobs.find((j) => j.id === e.target.value);
+                if (found) setSelectedJob(found);
+              }}
+              disabled={loading}
+              style={{ fontSize: '12.5px', padding: '9px 12px' }}
+            >
+              {customJobs.length > 0 && (
+                <optgroup label={`⭐ Custom & Uploaded JDs (${customJobs.length})`}>
+                  {customJobs.map((j) => (
+                    <option key={j.id} value={j.id}>
+                      {j.company} — {j.role} ({j.skills?.length || 0} requirements)
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="🏢 Tier-1 Enterprise Benchmarks">
+                {benchmarkJobs.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.company} — {j.role} ({j.skills?.length || 0} reqs) · {j.ctc}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Prominent Action Bar */}
+      <div
         style={{
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(20, 32, 56, 0.9) 100%)',
+          border: '1.5px solid var(--border-accent)',
           borderRadius: 'var(--radius-xl)',
-          padding: '20px 24px',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr auto',
+          padding: '16px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
           gap: '16px',
-          alignItems: 'flex-end',
-          boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          boxShadow: 'var(--shadow-glow-cyan)',
         }}
       >
-        <div>
-          <label className="form-label">Active Candidate Profile</label>
-          <select
-            className="form-select"
-            value={activeCandidate?.id || ''}
-            onChange={(e) => switchActiveCandidate(e.target.value)}
-            disabled={loading}
-          >
-            {candidates.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} — ({c.skills?.length || 0} skills)
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="form-label">Target Job Description</label>
-          <select
-            className="form-select"
-            value={currentJob?.id || ''}
-            onChange={(e) => {
-              const found = availableJobs.find((j) => j.id === e.target.value);
-              if (found) setSelectedJob(found);
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: 'rgba(56, 189, 248, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent-cyan)',
             }}
-            disabled={loading}
           >
-            {availableJobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.company} — {j.role} ({j.skills?.length || 0} required skills)
-              </option>
-            ))}
-          </select>
+            <GitCompare size={18} />
+          </div>
+          <div>
+            <div style={{ fontWeight: '700', fontSize: '13.5px', color: 'var(--text-primary)' }}>
+              Matching: {activeCandidate?.name} × {currentJob?.role} ({currentJob?.company})
+            </div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+              Comparing {activeCandidate?.skills?.length || 0} candidate skills against {currentJob?.skills?.length || 0} job requirements.
+            </div>
+          </div>
         </div>
 
-        <div>
-          <button
-            type="submit"
-            disabled={loading || !activeCandidate || !currentJob}
-            className="btn btn-primary"
-            style={{ height: '42px', minWidth: '160px' }}
-          >
-            <RefreshCw size={15} className={loading ? 'spin-animation' : ''} />
-            <span>{loading ? 'Matching...' : 'Run Skill Match'}</span>
-          </button>
-        </div>
-      </form>
+        <button
+          onClick={() => executeMatch(activeCandidate, currentJob, true)}
+          disabled={loading || !activeCandidate || !currentJob}
+          className="btn btn-primary"
+          style={{ height: '42px', padding: '0 24px', fontWeight: '700', fontSize: '13.5px' }}
+        >
+          <RefreshCw size={15} className={loading ? 'spin-animation' : ''} />
+          <span>{loading ? 'Analyzing Alignment...' : 'Run Skill Match & Gap Analysis'}</span>
+        </button>
+      </div>
 
       {/* LOADING STATE */}
       {loading && (
@@ -742,6 +1163,212 @@ export default function SkillMatchingPage() {
           </div>
         </>
       )}
+
+      {/* Modal 1: Quick Upload Resume */}
+      <Modal
+        isOpen={isResumeModalOpen}
+        onClose={() => {
+          setIsResumeModalOpen(false);
+          setResumeFile(null);
+          setResumeCandidateName('');
+        }}
+        title="Upload Resume for Skill Matching"
+        subtitle="Parse a candidate resume PDF/DOCX and run alignment against target requirements"
+      >
+        <form onSubmit={handleQuickUploadResume} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div>
+            <label className="form-label">Resume Document (.pdf, .docx)</label>
+            <div
+              onClick={() => document.getElementById('skill-match-resume-file').click()}
+              style={{
+                border: '2px dashed var(--border-medium)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '30px 20px',
+                textAlign: 'center',
+                background: 'var(--bg-surface-elevated)',
+                cursor: 'pointer',
+              }}
+            >
+              <input
+                id="skill-match-resume-file"
+                type="file"
+                accept=".pdf,.docx,.doc"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setResumeFile(file);
+                    setResumeCandidateName(deriveCandidateName(file.name));
+                  }
+                }}
+              />
+              <UploadCloud size={32} color="var(--accent-cyan)" style={{ margin: '0 auto 8px' }} />
+              <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                {resumeFile ? resumeFile.name : 'Click to select or drop resume document'}
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                PDF or Word (.docx) format
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="form-label">Candidate Full Name</label>
+            <input
+              type="text"
+              className="form-input"
+              value={resumeCandidateName}
+              onChange={(e) => setResumeCandidateName(e.target.value)}
+              placeholder="e.g. Rahul Sharma"
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+            <button
+              type="button"
+              onClick={() => setIsResumeModalOpen(false)}
+              className="btn btn-ghost"
+              disabled={isProcessingResume}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isProcessingResume || !resumeFile}
+              className="btn btn-primary"
+            >
+              {isProcessingResume ? <RefreshCw size={14} className="spin-animation" /> : <Sparkles size={14} />}
+              <span>{isProcessingResume ? 'Parsing & Matching...' : 'Extract & Run Match'}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal 2: Quick Add Custom JD */}
+      <Modal
+        isOpen={isJdModalOpen}
+        onClose={() => {
+          setIsJdModalOpen(false);
+          setJdCompany('');
+          setJdRole('');
+          setJdText('');
+          setJdFile(null);
+        }}
+        title="Add Custom Job Description"
+        subtitle="Paste raw requirements text or upload a JD document to match against candidate skills"
+      >
+        <form onSubmit={handleQuickAddJd} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
+            <button
+              type="button"
+              onClick={() => setJdModalTab('paste')}
+              className={`btn-ghost ${jdModalTab === 'paste' ? 'btn-primary' : ''}`}
+              style={{ padding: '6px 14px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}
+            >
+              Paste JD Text
+            </button>
+            <button
+              type="button"
+              onClick={() => setJdModalTab('upload')}
+              className={`btn-ghost ${jdModalTab === 'upload' ? 'btn-primary' : ''}`}
+              style={{ padding: '6px 14px', fontSize: '12px', borderRadius: 'var(--radius-sm)' }}
+            >
+              Upload JD File
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div>
+              <label className="form-label">Company Name</label>
+              <input
+                type="text"
+                className="form-input"
+                value={jdCompany}
+                onChange={(e) => setJdCompany(e.target.value)}
+                placeholder="e.g. Acme Corp"
+              />
+            </div>
+            <div>
+              <label className="form-label">Role Title</label>
+              <input
+                type="text"
+                className="form-input"
+                value={jdRole}
+                onChange={(e) => setJdRole(e.target.value)}
+                placeholder="e.g. Senior Backend Engineer"
+              />
+            </div>
+          </div>
+
+          {jdModalTab === 'paste' ? (
+            <div>
+              <label className="form-label">Job Requirements & Overview</label>
+              <textarea
+                className="form-textarea"
+                rows={6}
+                value={jdText}
+                onChange={(e) => setJdText(e.target.value)}
+                placeholder="Paste the job requirements, responsibilities, and expected competencies here..."
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="form-label">JD Document (.pdf, .docx)</label>
+              <div
+                onClick={() => document.getElementById('skill-match-jd-file').click()}
+                style={{
+                  border: '2px dashed var(--border-medium)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '30px 20px',
+                  textAlign: 'center',
+                  background: 'var(--bg-surface-elevated)',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  id="skill-match-jd-file"
+                  type="file"
+                  accept=".pdf,.docx,.doc"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setJdFile(file);
+                      if (!jdRole) setJdRole(file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+                    }
+                  }}
+                />
+                <UploadCloud size={32} color="var(--accent-violet)" style={{ margin: '0 auto 8px' }} />
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  {jdFile ? jdFile.name : 'Click to select or drop JD file'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  PDF or Word (.docx) format
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+            <button
+              type="button"
+              onClick={() => setIsJdModalOpen(false)}
+              className="btn btn-ghost"
+              disabled={isProcessingJd}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isProcessingJd || (jdModalTab === 'paste' ? !jdText.trim() : !jdFile)}
+              className="btn btn-primary"
+            >
+              {isProcessingJd ? <RefreshCw size={14} className="spin-animation" /> : <Sparkles size={14} />}
+              <span>{isProcessingJd ? 'Extracting & Matching...' : 'Save & Run Match'}</span>
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
